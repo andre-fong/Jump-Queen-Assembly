@@ -77,6 +77,8 @@ main:	# IMPORTANT TEMP REGISTERS: t0 (PLAYER LOCATION), t1 (COLOR),
 		j drawPlayer
 
 gameLoop:
+		# TODO: CHECK IF PLAYER AT VERY TOP (CLEARED LEVEL)
+		
 		# SET T3 (temp new player location) TO CURRENT PLAYER LOCATION
 		move $t3, $t0
 
@@ -103,7 +105,8 @@ respondToLeft:
 		div $t0, $t8
 		mfhi $t4	# t4 = playerLoc % 256
 		
-		beq $t4, $zero, SLEEP		# loc % 256 == 0 means player at left
+		li $t5, 4
+		beq $t4, $t5, updateLocation		# loc % 256 == 4 means player avatar at very left of screen
 		
 		# SET T3 TO NEW PLAYER LOC
 		addi $t3, $t0, -4
@@ -115,8 +118,8 @@ respondToRight:
 		div $t0, $t8
 		mfhi $t4	#t4 = playerLoc % 256
 		
-		li $t8, 248
-		beq $t4, $t8, SLEEP		# loc % 256 == 248 means player at right (since player loc is 2 units wide)
+		li $t8, 240
+		beq $t4, $t8, updateLocation		# loc % 256 == 240 means player avatar at very right of screen
 		
 		# SET T3 TO NEW PLAYER LOC
 		addi $t3, $t0, 4
@@ -201,7 +204,7 @@ decreaseHeightByTwo:
 		lw $t5, 0($t3)	# t5 = color of unit at new player loc (t3)
 		li $t1, BROWN
 		beq $t5, $t1, adjustDecreaseByTwoAfterPlatform
-		lw $t5, 4($t3)	# t5 = color of unit at new player loc rightmost unit (since player is cube)
+		lw $t5, 8($t3)	# t5 = color of unit at new player loc rightmost foot unit
 		li $t1, BROWN
 		beq $t5, $t1, adjustDecreaseByTwoAfterPlatform
 		
@@ -224,14 +227,50 @@ setVelocityZero:
 		
 # PREREQ: $t3 is a valid new player location within the screen
 undrawPlayer:
-		# REPLACE CUBE POSITION WITH BLACK BACKGROUND
+		# REPLACE AVATAR WITH BLACK BACKGROUND
 		li $t1, 0x0	# black
-		sw $t1, 0($t0)
-		sw $t1, 4($t0)
+		# dress outline and lined pattern
+		sw $t1, -260($t0)
 		sw $t1, -256($t0)
 		sw $t1, -252($t0)
+		sw $t1, -248($t0)
+		sw $t1, -244($t0)
+		sw $t1, -500($t0)
+		sw $t1, -1024($t0)
+		sw $t1, -1020($t0)
+		sw $t1, -1016($t0)
+		# shoes
+		sw $t1, 0($t0)
+		sw $t1, 8($t0)
+		# dress
+		sw $t1, -512($t0)
+		sw $t1, -508($t0)
+		sw $t1, -504($t0)
+		sw $t1, -764($t0)
+		sw $t1, -760($t0)
+		sw $t1, -1028($t0)
+		sw $t1, -1012($t0)
+		sw $t1, -1280($t0)
+		sw $t1, -1276($t0)
+		sw $t1, -1272($t0)
+		# hair
+		sw $t1, -1284($t0)
+		sw $t1, -1540($t0)
+		sw $t1, -1536($t0)
+		sw $t1, -1524($t0)
+		sw $t1, -1792($t0)
+		sw $t1, -1788($t0)
+		sw $t1, -1780($t0)
+		sw $t1, -2048($t0)
+		sw $t1, -2044($t0)
+		sw $t1, -2040($t0)
+		sw $t1, -2036($t0)
+		# face
+		sw $t1, -1532($t0)
+		sw $t1, -1528($t0)
+		sw $t1, -1784($t0)
 		
-		# UPDATE CUBE POSITION USING TEMP POSITION (T3)
+		# UPDATE AVATAR POSITION USING TEMP POSITION (T3)
 		move $t0, $t3
 		
 		# DRAW BACKGROUND NEXT
@@ -437,9 +476,8 @@ drawPlatformsUDLoop:
 		
 		# CHECK IF NEW LOCATION OF PLATFORM IS OCCUPIED BY PLAYER
 		# IF SO, MOVE PLAYER ONE UNIT UP
-		# TODO: CHANGE THIS ONCE PLAYER MODEL CHANGES
-		addi $t6, $t0, 4
-		ble $t8, $t6, checkPlayerInsideNewPlatform	# if new platform loc <= player loc + 4,
+		addi $t6, $t0, 8
+		ble $t8, $t6, checkPlayerInsideNewPlatform	# if new platform loc <= player loc + 8,
 										# player MAY need to move up one unit
 		
 		j drawPlatformsUDIterEnd	# end of iteration
@@ -447,7 +485,7 @@ drawPlatformsUDLoop:
 checkPlayerInsideNewPlatform:
 		# Assume t8 (new platform loc) set from prev branch
 		addi $t7, $t8, 20
-		ble $t0, $t7, movePlayerWithRaisingPlatform		# player loc <= new platform loc + 20
+		ble $t0, $t7, movePlayerWithRaisingPlatform		# player loc <= new platform loc + 20 (platform length)
 											# AND new platform loc <= player loc + 4,
 											# then player occupies new platform location
 		j drawPlatformsUDIterEnd
@@ -636,12 +674,53 @@ drawPlatformsLRLoop:
 #################################
 
 drawPlayer:
-		# DRAW CUBE (2x2)
-		li $t1, 0xff0000 # red
-		sw $t1, 0($t0)
-		sw $t1, 4($t0)
+		# DRAW AVATAR (width 5 x height 9)
+		
+		li $t1, 0xff4a60 # dark pink
+		sw $t1, -260($t0)	# dress outline and lined pattern
 		sw $t1, -256($t0)
 		sw $t1, -252($t0)
+		sw $t1, -248($t0)
+		sw $t1, -244($t0)
+		sw $t1, -500($t0)
+		sw $t1, -1024($t0)
+		sw $t1, -1020($t0)
+		sw $t1, -1016($t0)
+		
+		li $t1, 0x7bf8eb # light diamond blue
+		sw $t1, 0($t0)	# shoes
+		sw $t1, 8($t0)
+		
+		li $t1, 0xf87b8a	# light pink
+		sw $t1, -512($t0)	# dress
+		sw $t1, -508($t0)
+		sw $t1, -504($t0)
+		sw $t1, -764($t0)
+		sw $t1, -760($t0)
+		sw $t1, -1028($t0)
+		sw $t1, -1012($t0)
+		sw $t1, -1280($t0)
+		sw $t1, -1276($t0)
+		sw $t1, -1272($t0)
+		
+		li $t1, 0xf8f37b	# golden yellow
+		sw $t1, -1284($t0)	# hair
+		sw $t1, -1540($t0)
+		sw $t1, -1536($t0)
+		sw $t1, -1524($t0)
+		sw $t1, -1792($t0)
+		sw $t1, -1788($t0)
+		sw $t1, -1780($t0)
+		sw $t1, -2048($t0)
+		sw $t1, -2044($t0)
+		sw $t1, -2040($t0)
+		sw $t1, -2036($t0)
+		
+		li $t1, 0xf8c87b	# face
+		sw $t1, -1532($t0)
+		sw $t1, -1528($t0)
+		sw $t1, -1784($t0)
+		
 		j SLEEP
 
 # RETURNS 1 IF PLAYER IS ON A PLATFORM OR ON THE GROUND, 0 O/W
@@ -655,17 +734,15 @@ isGrounded:
 		# CHECK IF PIXEL(s) BELOW PLAYER IS PLATFORM (BROWN)
 		li $t1, BROWN
 		
-		# TODO: CHANGE CONDITION ONCE PLAYER MODEL CHANGES
 		lw $t6, 256($t0)		# load color of pixel below player loc (bottom leftmost player pixel)
-		lw $t7, 260($t0)		# load color of pixel below player loc (bottom rightmost player pixel)
+		lw $t7, 264($t0)		# load color of pixel below player loc (bottom rightmost player pixel)
 		
 		beq $t6, $t1, returnIsGrounded
 		beq $t7, $t1, returnIsGrounded
 		
 		# CHECK IF PIXEL(s) BELOW NEW PLAYER LOC IS PLATFORM (BROWN)
-		# TODO: CHANGE CONDITION ONCE PLAYER MODEL CHANGES
 		lw $t6, 256($t3)
-		lw $t7, 260($t3)
+		lw $t7, 264($t3)
 		beq $t6, $t1, returnIsGrounded
 		beq $t7, $t1, returnIsGrounded
 		
@@ -679,7 +756,7 @@ returnIsGrounded:
 # RETURNS 1 IF PLAYER REACHED TOP OF SCREEN (finished level), 0 O/W
 isFinishedLevel:
 		# GET TOP LEFTMOST PLAYER LOCATION
-		addi $t4, $t0, -256	# only one unit above since player is cube (TODO)
+		addi $t4, $t0, -2048	# 8 units above
 		
 		li $t5, 252
 		addi $t6, $t5, BASE_ADDRESS	# t6 = rightmost unit on first row
