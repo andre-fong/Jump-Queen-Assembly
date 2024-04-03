@@ -38,14 +38,29 @@
 .eqv BROWN 0x964B00
 
 .data
-lv1Platforms:	.word	0x1000BB28, 0x1000B788	# TODO
-lv1MovePlatformsUD:	.word	0x1000B728	# TODO: MAKE PLATFORMS MOVE!!!!!
-lv1MovePlatformsLR:	.word	0x0	# TODO
+# locations of static platforms
+lv1Platforms:	.word	0x1000BB28, 0x1000B088	# TODO
+
+# locations of moving platforms (up-down)
+lv1MovePlatformsUD:	.word	0x1000B728, 0x1000A728
+# move progress of respective platform (0 to 5)
+lv1MovePlatformsUDProg:	.word		0, 5
+# 0 = lowering, 1 = raising, 2+ = waiting
+lv1MovePlatformsUDState:	.word		0, 1
+
+# locations of moving platforms (left-right)
+lv1MovePlatformsLR:	.word	0x1000B788	# TODO
+# move progress of respective platform (0 to 5)
+lv1MovePlatformsLRProg:	.word		0
+# 0 = moving left, 1 = moving right, 2+ = waiting
+lv1MovePlatformsLRState:	.word		0
+
 currentLv:		.word	1 # TODO
 
 .text
 main:	# IMPORTANT TEMP REGISTERS: t0 (PLAYER LOCATION), t1 (COLOR), 
-		# t2 (PLAYER VERTICAL VELOCITY), t3 (TEMP PLAYER LOCATION)
+		# t2 (PLAYER VERTICAL VELOCITY), t3 (TEMP PLAYER LOCATION),
+		# t9 (GAME TICK)
 
 		# INITIALIZE PLAYER POSITION (bottom left of character)
 		li $t0, 0x1000BF28
@@ -56,21 +71,24 @@ main:	# IMPORTANT TEMP REGISTERS: t0 (PLAYER LOCATION), t1 (COLOR),
 		# SET T3 (temp new player location) TO CURRENT PLAYER LOCATION
 		move $t3, $t0
 		
+		# INITIALIZE GAME TICK TO 0 (inc. by 1 every iteration)
+		li $t9, 0
+		
 		j drawPlayer
 
 gameLoop:
 		# SET T3 (temp new player location) TO CURRENT PLAYER LOCATION
 		move $t3, $t0
 
-		# SET T9 TO ADDRESS OF KEYBOARD INPUT
-		li $t9, 0xffff0000
-		lw $t8, 0($t9)
+		# SET T5 TO ADDRESS OF KEYBOARD INPUT
+		li $t5, 0xffff0000
+		lw $t8, 0($t5)
 		beq $t8, 1, keypressHappened
 		
 		j updateLocation
 
 keypressHappened:
-		lw $t7, 4($t9) # this assumes $t9 is set to 0xfff0000 from before
+		lw $t7, 4($t5) # this assumes $t5 is set to 0xfff0000 from before
 		beq $t7, 0x61, respondToLeft 	# ASCII code of 'a' is 0x61
 		beq $t7, 0x64, respondToRight	# ASCII code of 'd' is 0x64
 		beq $t7, 0x77, respondToUp	# ASCII code of 'w' is 0x77
@@ -81,8 +99,8 @@ keypressHappened:
 		
 respondToLeft:
 		# CHECK MOVEMENT VALID (playerLoc at very left)
-		li $t9, 256
-		div $t0, $t9
+		li $t8, 256
+		div $t0, $t8
 		mfhi $t4	# t4 = playerLoc % 256
 		
 		beq $t4, $zero, SLEEP		# loc % 256 == 0 means player at left
@@ -93,8 +111,8 @@ respondToLeft:
 
 respondToRight:
 		# CHECK MOVEMENT VALID (playerLoc at very right)
-		li $t9, 256
-		div $t0, $t9
+		li $t8, 256
+		div $t0, $t8
 		mfhi $t4	#t4 = playerLoc % 256
 		
 		li $t8, 248
@@ -110,7 +128,7 @@ respondToUp:
 		beq $v0, $zero, SLEEP		# do nothing if player is not grounded (cannot jump while in midair)
 		
 		# SET VERTICAL VELOCITY TO t2 (CANNOT SET TO VELOCITY THAT IS INDIVISIBLE BY FALL SPD)
-		li $t2, 27
+		li $t2, 24	# adjust for QoL
 		
 		j updateLocation
 		
@@ -123,7 +141,7 @@ updateLocation:
 		li $t5, 1
 		beq $v0, $t5, undrawPlayer
 		
-		# UPDATE VELOCITY
+		# ELSE, UPDATE VELOCITY (player velocity is 0, but player is not grounded, so player is now falling)
 		j updateVelocityGravity
 
 updateVelocityGravity:
@@ -200,16 +218,6 @@ adjustDecreaseByTwoAfterPlatform:
 		
 		j setVelocityZero
 
-# TODO: BELOW FUNC NOT NEEDED
-skipDecreaseHeight:
-		# IF PLAYER IS GROUNDED (and velocity is negative), SET VELOCITY TO ZERO
-		jal isGrounded
-		li $t5, 1
-		beq $v0, $t5, setVelocityZero
-		
-		# ELSE, UPDATE VELOCITY
-		j updateVelocityGravity
-		
 setVelocityZero:
 		li $t2, 0
 		j undrawPlayer
@@ -240,16 +248,16 @@ drawBackground:
 drawPlatforms:
 		# INITIALIZE REGISTERS FOR DRAWING PLATFORM LOOP
 		li $t1, BROWN	# t1 = BROWN
-		la $t9, lv1Platforms	# t9 = memory address of array lv1Platforms
+		la $t8, lv1Platforms	# t8 = memory address of array lv1Platforms
 		li $t4, 8	# t4 = number of total platforms to draw * 4
 		li $t5, 0	# t5 = number of platforms drawn * 4
 		
 		j drawPlatformsLoop
 
 drawPlatformsLoop:
-		bge $t5, $t4, drawPlayer	# draw player next if platforms are done being drawn
+		bge $t5, $t4, movePlatformsUD	# start moving platforms (up-down) next if loop finishes
 		
-		add $t6, $t9, $t5	# t6 is memory address of lv1Platforms[iteration]
+		add $t6, $t8, $t5	# t6 is memory address of lv1Platforms[iteration]
 		lw $t7, 0($t6)	# t7 = location of lv1Platforms[iteration] on game screen
 		
 		# DRAW PLATFORM (+6 units to the right)
@@ -268,6 +276,195 @@ drawPlatformsLoop:
 		
 		addi $t5, $t5, 4	# increment # platforms drawn * 4
 		j drawPlatformsLoop
+
+movePlatformsUD:
+		# IF GAME TICK NOT DIVISIBLE BY 6, SKIP PLATFORM MOVING LOGIC AND DRAW MOVING PLATFORMS
+		li $t6, 6
+		div $t9, $t6
+		mfhi $t7
+		bnez $t7, drawPlatformsUD
+		
+		# INITIALIZE REGISTERS FOR HANDLING MOVING LOGIC (up-down)
+		li $t4, 8	# t4 = number of total platforms to handle * 4
+		li $t5, 0	# t5 = number of platforms handled * 4
+		
+		la $s1, lv1MovePlatformsUDProg	# s1 = address of array lv1MovePlatformsUDProg
+		la $s2, lv1MovePlatformsUDState		#s2 = address of array lv1MovePlatformsUDState
+		
+		j movePlatformsUDLoop
+
+movePlatformsUDLoop:
+		bge $t5, $t4, drawPlatformsUD	# draw moving platforms next if handling moving is finished
+
+		# AVAILABLE REGISTERS: t6, t7, t8
+		
+		# GET STATE OF PLATFORM (0 = lowering, 1 = raising, 2+ = waiting)
+		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsUDState[iteration]
+		lw $a0, 0($t6)	# a0 = STATE of platform lv1MovePlatforms[iteration]
+		
+		#TODO, print state
+		li $v0, 1
+		#syscall
+		
+		# GET PROG OF PLATFORM (0 to 5)
+		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsUDProg[iteration]
+		lw $a1, 0($t6)	# a1 = PROG of platform lv1MovePlatforms[iteration]
+		
+		beqz $a0, handleLowerPlatform	# if state == 0, handle lowering platform
+		
+		li $t7, 1
+		beq $a0, $t7, handleRaisePlatform	# if state == 1, handle raising platform
+		
+		li $t7, 4
+		beq $a0, $t7, handleContinuePlatformUD	# if state == 4, handle 
+							# continuing to move platform (DONE WAITING)
+		
+		# OTHERWISE, 2 <= STATE < 4 (continue waiting)
+		addi $a0, $a0, 1	# increment state
+		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsUDState[iteration]
+		sw $a0, 0($t6)	# store waiting state back into lv1MovePlatformsUDState[iteration]
+		
+		j movePlatformsUDIterEnd	# end of iteration
+
+handleLowerPlatform:
+		beqz $a1, handleDoneMovingPlatformUD	# if platform prog == 0, platform is done lowering
+		
+		# O/W PLATFORM IS STILL LOWERING
+		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsUDProg[iteration]
+		
+		add $t7, $s0, $t5	# t7 is the memory address of lv1MovePlatformsUD[iteration]
+		lw $a2, 0($t7)	# a2 is the location of lv1MovePlatformsUD[iteration] on the screen
+		jal undrawPlatformUD	# undraw platform at old prog $a1, given platform at $a2
+		
+		addi $a1, $a1, -1		# decrement prog
+		sw $a1, 0($t6)	# store decremented prog back into lv1MovePlatformsUDProg[iteration]
+		
+		j movePlatformsUDIterEnd	# end of iteration
+		
+handleRaisePlatform:
+		li $t6, 5	# since progress is 0 to 5
+		beq $a1, $t6, handleDoneMovingPlatformUD		# if platform prog == 5, platform is done raising
+		
+		# O/W PLATFORM IS STILL RAISING
+		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsUDProg[iteration]
+		
+		add $t7, $s0, $t5	# t7 is the memory address of lv1MovePlatformsUD[iteration]
+		lw $a2, 0($t7)	# a2 is the location of lv1MovePlatformsUD[iteration] on the screen
+		jal undrawPlatformUD	# undraw platform at old prog $a1, given platform at $a2
+		
+		addi $a1, $a1, 1		# increment prog
+		sw $a1, 0($t6)	# store incremented prog back into lv1MovePlatformsUDProg[iteration]
+		
+		j movePlatformsUDIterEnd	# end of iteration
+		
+handleDoneMovingPlatformUD:
+		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsUDState[iteration]
+		li $t7, 2	# t7 = waiting state (2)
+		sw $t7, 0($t6)	# store waiting state back into lv1MovePlatformsUDState[iteration]
+		
+		j movePlatformsUDIterEnd	# end of iteration
+
+handleContinuePlatformUD:
+		beqz $a1, startRaising		# if prog == 0, then platform just finished lowering (should start raising)
+		
+		# O/W, PLATFORM SHOULD START LOWERING
+		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsUDState[iteration]
+		sw $zero, 0($t6)		# store lowering state (0) back into lv1MovePlatformsUDState[iteration]
+		
+		j movePlatformsUDIterEnd	# end of iteration
+startRaising:
+		# PLATFORM SHOULD START RAISING
+		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsUDState[iteration]
+		li $t7, 1	# t7 = raising state (1)
+		sw $t7, 0($t6)	# store raising state back into lv1MovePlatformsUDState[iteration]
+		
+		j movePlatformsUDIterEnd	# end of iteration
+
+movePlatformsUDIterEnd:
+		addi $t5, $t5, 4	# increment # platforms handled * 4
+		j movePlatformsUDLoop
+
+# PREREQ: $a1 is set to the old offset of the platform (to undraw), 
+#		  $a2 is set to the location of the platform
+undrawPlatformUD:
+		# GET OFFSET * 256
+		li $t7, 256
+		mult $a1, $t7
+		mflo $t8	# t8 = vertical offset (0-5) * 256
+		
+		# UNDRAW PLATFORM wrt. OFFSET GIVEN BY PROG
+		sub $t7, $a2, $t8		# t7 = location of moving platform - (vertical offset)
+		
+		# UNDRAW PLATFORM (+6 units to the right)
+		li $t1, 0x0	# BLACK
+		sw $t1, 0($t7)
+		sw $t1, 4($t7)
+		sw $t1, 8($t7)
+		sw $t1, 12($t7)
+		sw $t1, 16($t7)
+		sw $t1, 20($t7)
+		
+		jr $ra
+
+drawPlatformsUD:
+		# INITIALIZE REGISTERS FOR DRAWING MOVING PLATFORMS (up-down)
+		li $t1, BROWN
+		li $t4, 8	# t4 = number of total platforms to draw * 4
+		li $t5, 0	# t5 = number of platforms drawn * 4
+		la $s0, lv1MovePlatformsUD	# s0 = memory address of array lv1MovePlatformsUD
+		la $s1, lv1MovePlatformsUDProg
+		
+		j drawPlatformsUDLoop
+		
+drawPlatformsUDLoop:
+		bge $t5, $t4, drawPlayer	# draw player next if drawing moving platforms is finished
+		
+		# AVAILABLE REGISTERS: (t1), t6, t7, t8
+		
+		# GET VERTICAL OFFSET FROM PROG
+		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsUDProg[iteration]
+		lw $t7, 0($t6)	# t7 = vertical offset of platform lv1MovePlatforms[iteration]
+		li $t8, 256
+		mult $t7, $t8
+		mflo $t6	# t6 = vertical offset (0-5) * 256
+		
+		# GET NEW PLATFORM LOCATION wrt. OFFSET GIVEN BY PROG
+		add $t7, $s0, $t5	# t7 is memory address of lv1MovePlatformsUD[iteration]
+		lw $t8, 0($t7)	# t8 = location of lv1MovePlatformsUD[iteration] on game screen
+		
+		sub $t8, $t8, $t6		# t8 = location of moving platform - (vertical offset)
+		
+		# CHECK IF NEW LOCATION OF PLATFORM IS OCCUPIED BY PLAYER
+		# IF SO, MOVE PLAYER ONE UNIT UP
+		# TODO: CHANGE THIS ONCE PLAYER MODEL CHANGES
+		addi $t6, $t0, 4
+		ble $t8, $t6, checkPlayerInsideNewPlatform	# if new platform loc <= player loc + 4,
+										# player MAY need to move up one unit
+		
+		j drawPlatformsUDIterEnd	# end of iteration
+
+checkPlayerInsideNewPlatform:
+		# Assume t8 (new platform loc) set from prev branch
+		addi $t7, $t8, 20
+		ble $t0, $t7, movePlayerWithRaisingPlatform		# player loc <= new platform loc + 20
+											# AND new platform loc <= player loc + 4,
+											# then player occupies new platform location
+		j drawPlatformsUDIterEnd
+movePlayerWithRaisingPlatform:
+		addi $t0, $t0, -256
+		j drawPlatformsUDIterEnd
+		
+drawPlatformsUDIterEnd:
+		# DRAW PLATFORM (+6 units to the right)
+		sw $t1, 0($t8)
+		sw $t1, 4($t8)
+		sw $t1, 8($t8)
+		sw $t1, 12($t8)
+		sw $t1, 16($t8)
+		sw $t1, 20($t8)
+		
+		addi $t5, $t5, 4	# increment # platforms drawn * 4
+		j drawPlatformsUDLoop
 
 drawPlayer:
 		# DRAW CUBE (2x2)
@@ -289,6 +486,7 @@ isGrounded:
 		# CHECK IF PIXEL(s) BELOW PLAYER IS PLATFORM (BROWN)
 		li $t1, BROWN
 		
+		# TODO: CHANGE CONDITION ONCE PLAYER MODEL CHANGES
 		lw $t6, 256($t0)		# load color of pixel below player loc (bottom leftmost player pixel)
 		lw $t7, 260($t0)		# load color of pixel below player loc (bottom rightmost player pixel)
 		
@@ -296,6 +494,7 @@ isGrounded:
 		beq $t7, $t1, returnIsGrounded
 		
 		# CHECK IF PIXEL(s) BELOW NEW PLAYER LOC IS PLATFORM (BROWN)
+		# TODO: CHANGE CONDITION ONCE PLAYER MODEL CHANGES
 		lw $t6, 256($t3)
 		lw $t7, 260($t3)
 		beq $t6, $t1, returnIsGrounded
@@ -328,14 +527,21 @@ SLEEP:	li $v0, 32
 		li $a0, 30	# Wait 100ms (TODO)
 		syscall
 		
-		# TODO: remove printing velocity
+		#TODO: remove print
 		li $v0, 1
-		move $a0, $t2
-		syscall
+		move $a0, $t9
+		#syscall
 		
-		j gameLoop	# jump back to game loop
+		# RESET GAME TICK IF >= 2,147,483,646
+		li $t4, 2147483646
+		bge $t9, $t4, resetGameTick
+		
+		# ELSE, INCREASE GAME TICK AND RETURN TO GAME LOOP
+		addi $t9, $t9, 1
+		j gameLoop
+resetGameTick:
+		li $t9, 0
+		j gameLoop
 
 QUIT:	li $v0, 10
 		syscall
-
-			
