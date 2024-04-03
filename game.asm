@@ -50,7 +50,7 @@ lv1MovePlatformsUDState:	.word		0, 1
 
 # locations of moving platforms (left-right)
 lv1MovePlatformsLR:	.word	0x1000B788	# TODO
-# move progress of respective platform (0 to 5)
+# move progress of respective platform (0 to 7)
 lv1MovePlatformsLRProg:	.word		0
 # 0 = moving left, 1 = moving right, 2+ = waiting
 lv1MovePlatformsLRState:	.word		0
@@ -288,6 +288,7 @@ movePlatformsUD:
 		li $t4, 8	# t4 = number of total platforms to handle * 4
 		li $t5, 0	# t5 = number of platforms handled * 4
 		
+		la $s0, lv1MovePlatformsUD	# s0 = memory address of array lv1MovePlatformsUD
 		la $s1, lv1MovePlatformsUDProg	# s1 = address of array lv1MovePlatformsUDProg
 		la $s2, lv1MovePlatformsUDState		#s2 = address of array lv1MovePlatformsUDState
 		
@@ -300,7 +301,7 @@ movePlatformsUDLoop:
 		
 		# GET STATE OF PLATFORM (0 = lowering, 1 = raising, 2+ = waiting)
 		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsUDState[iteration]
-		lw $a0, 0($t6)	# a0 = STATE of platform lv1MovePlatforms[iteration]
+		lw $a0, 0($t6)	# a0 = STATE of platform lv1MovePlatformsUD[iteration]
 		
 		#TODO, print state
 		li $v0, 1
@@ -308,7 +309,7 @@ movePlatformsUDLoop:
 		
 		# GET PROG OF PLATFORM (0 to 5)
 		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsUDProg[iteration]
-		lw $a1, 0($t6)	# a1 = PROG of platform lv1MovePlatforms[iteration]
+		lw $a1, 0($t6)	# a1 = PROG of platform lv1MovePlatformsUD[iteration]
 		
 		beqz $a0, handleLowerPlatform	# if state == 0, handle lowering platform
 		
@@ -417,7 +418,7 @@ drawPlatformsUD:
 		j drawPlatformsUDLoop
 		
 drawPlatformsUDLoop:
-		bge $t5, $t4, drawPlayer	# draw player next if drawing moving platforms is finished
+		bge $t5, $t4, movePlatformsLR	# once up-down platforms are done, start handling LEFT-RIGHT PLATFORMS
 		
 		# AVAILABLE REGISTERS: (t1), t6, t7, t8
 		
@@ -465,6 +466,174 @@ drawPlatformsUDIterEnd:
 		
 		addi $t5, $t5, 4	# increment # platforms drawn * 4
 		j drawPlatformsUDLoop
+		
+##########################
+movePlatformsLR:
+		# IF GAME TICK NOT DIVISIBLE BY 6, SKIP PLATFORM MOVING LOGIC AND DRAW MOVING PLATFORMS
+		li $t6, 6
+		div $t9, $t6
+		mfhi $t7
+		bnez $t7, drawPlatformsLR
+		
+		# INITIALIZE REGISTERS FOR HANDLING MOVING LOGIC (left-right)
+		li $t4, 4	# t4 = number of total platforms to handle * 4
+		li $t5, 0	# t5 = number of platforms handled * 4
+		
+		la $s0, lv1MovePlatformsLR	# s0 = memory address of array lv1MovePlatformsLR
+		la $s1, lv1MovePlatformsLRProg	# s1 = address of array lv1MovePlatformsLRProg
+		la $s2, lv1MovePlatformsLRState		#s2 = address of array lv1MovePlatformsLRState
+		
+		j movePlatformsLRLoop
+
+movePlatformsLRLoop:
+		bge $t5, $t4, drawPlatformsLR	# draw moving platforms next if handling moving is finished
+
+		# AVAILABLE REGISTERS: t6, t7, t8
+		
+		# GET STATE OF PLATFORM (0 = moving left, 1 = moving right, 2+ = waiting)
+		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsLRState[iteration]
+		lw $a0, 0($t6)	# a0 = STATE of platform lv1MovePlatformsLR[iteration]
+		
+		# GET PROG OF PLATFORM (0 to 7)
+		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsLRProg[iteration]
+		lw $a1, 0($t6)	# a1 = PROG of platform lv1MovePlatformsLR[iteration]
+		
+		beqz $a0, handleLeftPlatform	# if state == 0, handle moving platform left
+		
+		li $t7, 1
+		beq $a0, $t7, handleRightPlatform	# if state == 1, handle moving platform right
+		
+		li $t7, 4
+		beq $a0, $t7, handleContinuePlatformLR	# if state == 4, handle 
+							# continuing to move platform (DONE WAITING)
+		
+		# OTHERWISE, 2 <= STATE < 4 (continue waiting)
+		addi $a0, $a0, 1	# increment state
+		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsLRState[iteration]
+		sw $a0, 0($t6)	# store waiting state back into lv1MovePlatformsLRState[iteration]
+		
+		j movePlatformsLRIterEnd	# end of iteration
+
+handleLeftPlatform:
+		beqz $a1, handleDoneMovingPlatformLR	# if platform prog == 0, platform is done moving left
+		
+		# O/W PLATFORM IS STILL MOVING LEFT
+		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsLRProg[iteration]
+		
+		add $t7, $s0, $t5	# t7 is the memory address of lv1MovePlatformsLR[iteration]
+		lw $a2, 0($t7)	# a2 is the location of lv1MovePlatformsLR[iteration] on the screen
+		jal undrawPlatformLR	# undraw platform at old prog $a1, given platform at $a2
+		
+		addi $a1, $a1, -1		# decrement prog
+		sw $a1, 0($t6)	# store decremented prog back into lv1MovePlatformsLRProg[iteration]
+		
+		j movePlatformsLRIterEnd	# end of iteration
+		
+handleRightPlatform:
+		li $t6, 7	# since progress is 0 to 7
+		beq $a1, $t6, handleDoneMovingPlatformLR		# if platform prog == 7, platform is done moving right
+		
+		# O/W PLATFORM IS STILL MOVING RIGHT
+		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsLRProg[iteration]
+		
+		add $t7, $s0, $t5	# t7 is the memory address of lv1MovePlatformsLR[iteration]
+		lw $a2, 0($t7)	# a2 is the location of lv1MovePlatformsLR[iteration] on the screen
+		jal undrawPlatformLR	# undraw platform at old prog $a1, given platform at $a2
+		
+		addi $a1, $a1, 1		# increment prog
+		sw $a1, 0($t6)	# store incremented prog back into lv1MovePlatformsLRProg[iteration]
+		
+		j movePlatformsLRIterEnd	# end of iteration
+		
+handleDoneMovingPlatformLR:
+		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsLRState[iteration]
+		li $t7, 2	# t7 = waiting state (2)
+		sw $t7, 0($t6)	# store waiting state back into lv1MovePlatformsLRState[iteration]
+		
+		j movePlatformsLRIterEnd	# end of iteration
+
+handleContinuePlatformLR:
+		beqz $a1, startMovingRight		# if prog == 0, then platform just finished going left (should start going right)
+		
+		# O/W, PLATFORM SHOULD START GOING LEFT
+		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsLRState[iteration]
+		sw $zero, 0($t6)		# store moving left state (0) back into lv1MovePlatformsLRState[iteration]
+		
+		j movePlatformsLRIterEnd	# end of iteration
+startMovingRight:
+		# PLATFORM SHOULD START MOVING RIGHT
+		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsLRState[iteration]
+		li $t7, 1	# t7 = moving right state (1)
+		sw $t7, 0($t6)	# store moving right state back into lv1MovePlatformsLRState[iteration]
+		
+		j movePlatformsLRIterEnd	# end of iteration
+
+movePlatformsLRIterEnd:
+		addi $t5, $t5, 4	# increment # platforms handled * 4
+		j movePlatformsLRLoop
+
+# PREREQ: $a1 is set to the old offset of the platform (to undraw), 
+#		  $a2 is set to the location of the platform
+undrawPlatformLR:
+		# GET OFFSET * 4
+		li $t7, 4
+		mult $a1, $t7
+		mflo $t8	# t8 = horizontal offset (0-5) * 4
+		
+		# UNDRAW PLATFORM wrt. OFFSET GIVEN BY PROG
+		add $t7, $a2, $t8		# t7 = location of moving platform + (horizontal offset)
+		
+		# UNDRAW PLATFORM (+6 units to the right)
+		li $t1, 0x0	# BLACK
+		sw $t1, 0($t7)
+		sw $t1, 4($t7)
+		sw $t1, 8($t7)
+		sw $t1, 12($t7)
+		sw $t1, 16($t7)
+		sw $t1, 20($t7)
+		
+		jr $ra
+		
+drawPlatformsLR:
+		# INITIALIZE REGISTERS FOR DRAWING MOVING PLATFORMS (left-right)
+		li $t1, BROWN
+		li $t4, 4	# t4 = number of total platforms to draw * 4
+		li $t5, 0	# t5 = number of platforms drawn * 4
+		la $s0, lv1MovePlatformsLR	# s0 = memory address of array lv1MovePlatformsLR
+		la $s1, lv1MovePlatformsLRProg
+		
+		j drawPlatformsLRLoop
+		
+drawPlatformsLRLoop:
+		bge $t5, $t4, drawPlayer	# once left-right platforms are done, start drawing player
+		
+		# AVAILABLE REGISTERS: (t1), t6, t7, t8
+		
+		# GET HORIZONTAL OFFSET FROM PROG
+		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsLRProg[iteration]
+		lw $t7, 0($t6)	# t7 = horizontal offset of platform lv1MovePlatformsLR[iteration]
+		li $t8, 4
+		mult $t7, $t8
+		mflo $t6	# t6 = horizontal offset (0-5) * 4
+		
+		# GET NEW PLATFORM LOCATION wrt. OFFSET GIVEN BY PROG
+		add $t7, $s0, $t5	# t7 is memory address of lv1MovePlatformsLR[iteration]
+		lw $t8, 0($t7)	# t8 = location of lv1MovePlatformsLR[iteration] on game screen
+		
+		add $t8, $t8, $t6		# t8 = location of moving platform + (horizontal unit offset)
+		
+		# DRAW PLATFORM (+6 units to the right)
+		sw $t1, 0($t8)
+		sw $t1, 4($t8)
+		sw $t1, 8($t8)
+		sw $t1, 12($t8)
+		sw $t1, 16($t8)
+		sw $t1, 20($t8)
+		
+		addi $t5, $t5, 4	# increment # platforms drawn * 4
+		j drawPlatformsLRLoop
+
+#################################
 
 drawPlayer:
 		# DRAW CUBE (2x2)
