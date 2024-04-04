@@ -37,10 +37,15 @@
 .eqv BASE_ADDRESS 0x10008000
 .eqv BROWN 0x964B00
 .eqv LIGHTBROWN 0xB27538
+
 .eqv WHITE 0xFFFFFF
 .eqv LIGHTGRAY 0xE9E9E9
 .eqv GRAY 0xBEBEBE
 .eqv LIGHTORANGE 0xFFD798
+
+.eqv LIGHTYELLOW 0xFFAC6C
+.eqv LIGHTBLUE 0xC9FBFF
+.eqv DARKORANGE 0xD85F00
 
 .data
 # locations of static platforms
@@ -64,6 +69,11 @@ lv1MovePlatformsLRState:	.word		0
 lv1Feathers:	.word	0x1000A128
 lv1FeathersAlive:	.word	1
 featherInEffect:	.byte		0
+
+# locations of hourglass pickups (slow down time)
+lv1Hourglasses:	.word	0x1000A888
+lv1HourglassesAlive:	.word	1
+hourglassInEffect:	.byte		0
 
 currentLv:		.word	1 # TODO
 
@@ -161,6 +171,10 @@ respondToUpWithFeather:
 		
 		j updateLocation
 		
+###################################################
+# VERTICAL LOCATION (gravity)
+###################################################
+
 updateLocation:
 		# CHECK VERTICAL VELOCITY
 		bnez $t2, updateLocationVERTICAL	# if velocity is nonzero, update vertical location of player
@@ -250,7 +264,12 @@ adjustDecreaseByTwoAfterPlatform:
 setVelocityZero:
 		li $t2, 0
 		j undrawPlayer
-		
+
+#################################################
+# DRAWING (undraw player, draw background, pickups, platforms, moving platforms, draw player)
+# AND HANDLING COLLISIONS
+#################################################
+
 # PREREQ: $t3 is a valid new player location within the screen
 undrawPlayer:
 		# REPLACE AVATAR WITH BLACK BACKGROUND
@@ -320,7 +339,7 @@ drawFeathers:
 		j drawFeathersLoop
 
 drawFeathersLoop:
-		bge $t5, $t4, drawPlatforms	# start drawing platforms next if loop finishes
+		bge $t5, $t4, drawHourglasses	# start drawing hourglasses next if loop finishes
 		
 		# CHECK IF FEATHER IS STILL ALIVE (not picked up yet)
 		add $t6, $s1, $t5	# t6 is memory address of lv1FeathersAlive[iteration]
@@ -334,6 +353,11 @@ drawFeathersLoop:
 		li $t8, 16
 		add $t8, $t8, $t0
 		bge $t8, $t7, checkPlayerTouchFeather		# if player loc + 16 >= feather loc, player may be touching feather
+		
+		# CHECK ONE ROW ABOVE FEATHER LOC (detect one more row)
+		addi $t7, $t7, -256
+		bge $t8, $t7, checkPlayerTouchFeather		# if player loc + 16 >= feather loc + one row, 
+											# player may be touching feather
 		
 		# ELSE, DRAW FEATHER
 		j drawFeatherOnScreen
@@ -351,7 +375,7 @@ checkPlayerTouchFeather:
 pickUpFeather:
 		# SET FEATHERALIVE[iteration] TO 0
 		add $t6, $s1, $t5	# t6 is memory address of lv1FeathersAlive[iteration]
-		sw $zero, 0($t6)	# t7 = whether or not feather is still alive
+		sw $zero, 0($t6)	
 		
 		# SET FEATHER IN EFFECT TO 1
 		li $t7, 1
@@ -436,6 +460,146 @@ undrawFeatherOnScreen:
 		sw $t1, -1516($t7)
 		
 		jr $ra
+		
+drawHourglasses:
+		# INITIALIZE REGISTERS FOR DRAWING HOURGLASSES LOOP
+		li $t4, 4	# t4 = number of total hourglasses to draw * 4
+		li $t5, 0	# t5 = number of hourglasses drawn * 4
+		la $s0, lv1Hourglasses	# s0 = memory address of array lv1Hourglasses
+		la $s1, lv1HourglassesAlive	# s1 = memory address of array lv1HourglassesAlive
+		la $s2, hourglassInEffect		# s2 = memory address of boolean hourglassInEffect
+								# (0 = not in effect, 1 = in effect)
+		
+		j drawHourglassesLoop
+drawHourglassesLoop:
+		bge $t5, $t4, drawHearts	# start drawing hearts next if loop finishes
+		
+		# CHECK IF HOURGLASS IS STILL ALIVE (not picked up yet)
+		add $t6, $s1, $t5	# t6 is memory address of lv1HourglassesAlive[iteration]
+		lw $t7, 0($t6)	# t7 = whether or not hourglass is still alive
+		beqz $t7, drawHourglassesIterEnd	# if hourglass is not alive, skip checking player dist and drawing
+
+		# CHECK IF PLAYER IS NEAR HOURGLASS
+		add $t6, $s0, $t5	# t6 is memory address of lv1Hourglasses[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv1Hourglasses[iteration] on game screen
+		
+		li $t8, 16
+		add $t8, $t8, $t0
+		bge $t8, $t7, checkPlayerTouchHourglass		# if player loc + 16 >= hourglass loc, 
+											# player may be touching hourglass
+											
+		# CHECK ONE ROW ABOVE HOURGLASS LOC (detect one more row)
+		addi $t7, $t7, -256
+		bge $t8, $t7, checkPlayerTouchHourglass		# if player loc + 16 >= hourglass loc + one row, 
+											# player may be touching hourglass
+		
+		# ELSE, DRAW HOURGLASS
+		j drawHourglassOnScreen
+
+checkPlayerTouchHourglass:
+		# Assume $t7 set to location of lv1Hourglasses[iteration] 
+		# OR lv1Hourglasses[iteration] + one row, from previous branch
+		li $t8, 20
+		add $t8, $t8, $t7
+		bge $t8, $t0, pickUpHourglass		# if hourglass loc + 20 >= player loc AND
+								# player loc + 16 >= hourglass loc, player IS touching hourglass
+		
+		# IF PLAYER ISN'T TOUCHING HOURGLASS, DRAW
+		j drawHourglassOnScreen
+
+pickUpHourglass:
+		# SET HOURGLASSALIVE[iteration] TO 0
+		add $t6, $s1, $t5	# t6 is memory address of lv1HourglassesAlive[iteration]
+		sw $zero, 0($t6)
+		
+		# SET HOURGLASS IN EFFECT TO 1
+		li $t7, 1
+		sb $t7, 0($s2)	# since s2 = memory address of boolean hourglassInEffect
+		
+		# UNDRAW HOURGLASS
+		jal undrawHourglassOnScreen
+		
+		j drawHourglassesIterEnd		# end of iteration (no need to draw hourglass, since it's been picked up)
+		
+drawHourglassOnScreen:
+		add $t6, $s0, $t5	# t6 is memory address of lv1Hourglasses[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv1Hourglasses[iteration] on game screen
+		
+		# top and bottom cap
+		li $t1, DARKORANGE
+		sw $t1, 0($t7)
+		sw $t1, 4($t7)
+		sw $t1, 8($t7)
+		sw $t1, 12($t7)
+		sw $t1, -1536($t7)
+		sw $t1, -1532($t7)
+		sw $t1, -1528($t7)
+		sw $t1, -1524($t7)
+		
+		# glass
+		li $t1, LIGHTBLUE
+		sw $t1, -256($t7)
+		sw $t1, -244($t7)
+		sw $t1, -512($t7)
+		sw $t1, -500($t7)
+		sw $t1, -764($t7)
+		sw $t1, -760($t7)
+		sw $t1, -1024($t7)
+		sw $t1, -1012($t7)
+		sw $t1, -1280($t7)
+		sw $t1, -1268($t7)
+		
+		# sand
+		li $t1, LIGHTYELLOW
+		sw $t1, -252($t7)
+		sw $t1, -248($t7)
+		sw $t1, -508($t7)
+		sw $t1, -504($t7)
+		
+		j drawHourglassesIterEnd
+				
+drawHourglassesIterEnd:
+		addi $t5, $t5, 4	# increment # hourglasses handled * 4
+		j drawHourglassesLoop
+
+# PREREQ: $s0 is the memory address of lv1Hourglasses[iteration]
+#		  $t5 is the iteration count * 4
+undrawHourglassOnScreen:
+		add $t6, $s0, $t5	# t6 is memory address of lv1Hourglasses[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv1Hourglasses[iteration] on game screen
+		
+		li $t1, 0x0	# black
+		
+		# top and bottom cap
+		sw $t1, 0($t7)
+		sw $t1, 4($t7)
+		sw $t1, 8($t7)
+		sw $t1, 12($t7)
+		sw $t1, -1536($t7)
+		sw $t1, -1532($t7)
+		sw $t1, -1528($t7)
+		sw $t1, -1524($t7)
+		# glass
+		sw $t1, -256($t7)
+		sw $t1, -244($t7)
+		sw $t1, -512($t7)
+		sw $t1, -500($t7)
+		sw $t1, -764($t7)
+		sw $t1, -760($t7)
+		sw $t1, -1024($t7)
+		sw $t1, -1012($t7)
+		sw $t1, -1280($t7)
+		sw $t1, -1268($t7)
+		# sand
+		sw $t1, -252($t7)
+		sw $t1, -248($t7)
+		sw $t1, -508($t7)
+		sw $t1, -504($t7)
+		
+		jr $ra
+
+drawHearts:
+		j drawPlatforms	# TODO
 
 # PREREQ: none of the platforms are 6 or more units from the rightmost part of the screen
 # 		  nor 2 or more units from the bottom of the screen
@@ -472,6 +636,7 @@ drawPlatformsLoop:
 		addi $t5, $t5, 4	# increment # platforms drawn * 4
 		j drawPlatformsLoop
 
+# UP TO DOWN ########################
 movePlatformsUD:
 		# IF GAME TICK NOT DIVISIBLE BY 6, SKIP PLATFORM MOVING LOGIC AND DRAW MOVING PLATFORMS
 		li $t6, 6
@@ -674,7 +839,7 @@ drawPlatformsUDIterEnd:
 		addi $t5, $t5, 4	# increment # platforms drawn * 4
 		j drawPlatformsUDLoop
 		
-##########################
+# LEFT TO RIGHT ###########
 movePlatformsLR:
 		# IF GAME TICK NOT DIVISIBLE BY 6, SKIP PLATFORM MOVING LOGIC AND DRAW MOVING PLATFORMS
 		li $t6, 6
@@ -852,8 +1017,6 @@ drawPlatformsLRLoop:
 		
 		addi $t5, $t5, 4	# increment # platforms drawn * 4
 		j drawPlatformsLRLoop
-
-#################################
 
 drawPlayer:
 		# DRAW AVATAR (width 5 x height 9)
