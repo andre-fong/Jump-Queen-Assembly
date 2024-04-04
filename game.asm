@@ -140,8 +140,24 @@ respondToUp:
 		jal isGrounded		# return value at v0
 		beq $v0, $zero, SLEEP		# do nothing if player is not grounded (cannot jump while in midair)
 		
+		# CHECK IF FEATHER EFFECT IS ACTIVE
+		la $t4, featherInEffect
+		lb $t5, 0($t4)	# t5 = whether or not feather effect is active
+		li $t6, 1
+		beq $t5, $t6, respondToUpWithFeather
+		
 		# SET VERTICAL VELOCITY TO t2 (CANNOT SET TO VELOCITY THAT IS INDIVISIBLE BY FALL SPD)
-		li $t2, 24	# adjust for QoL
+		li $t2, 21	# adjust for QoL
+		
+		j updateLocation
+		
+respondToUpWithFeather:
+		# SET VERTICAL VELOCITY TO t2 (higher than normal velocity)
+		li $t2, 27
+		
+		# SET FEATHER IN EFFECT TO 0 (feather only lasts one jump)
+		la $t4, featherInEffect
+		sb $zero, 0($t4)		# feather in effect = 0
 		
 		j updateLocation
 		
