@@ -36,6 +36,11 @@
 
 .eqv BASE_ADDRESS 0x10008000
 .eqv BROWN 0x964B00
+.eqv LIGHTBROWN 0xB27538
+.eqv WHITE 0xFFFFFF
+.eqv LIGHTGRAY 0xE9E9E9
+.eqv GRAY 0xBEBEBE
+.eqv LIGHTORANGE 0xFFD798
 
 .data
 # locations of static platforms
@@ -54,6 +59,11 @@ lv1MovePlatformsLR:	.word	0x1000B788	# TODO
 lv1MovePlatformsLRProg:	.word		0
 # 0 = moving left, 1 = moving right, 2+ = waiting
 lv1MovePlatformsLRState:	.word		0
+
+# locations of feather pickups (increases jumping power)
+lv1Feathers:	.word	0x1000A128
+lv1FeathersAlive:	.word	1
+featherInEffect:	.byte		0
 
 currentLv:		.word	1 # TODO
 
@@ -279,14 +289,142 @@ undrawPlayer:
 drawBackground:
 		# TODO
 		
-		# DRAW PLATFORMS NEXT
-		j drawPlatforms
+		# DRAW PICKUPS NEXT
+		j drawFeathers
+
+drawFeathers:
+		# INITIALIZE REGISTERS FOR DRAWING FEATHERS LOOP
+		li $t4, 4	# t4 = number of total feathers to draw * 4
+		li $t5, 0	# t5 = number of feathers drawn * 4
+		la $s0, lv1Feathers	# s0 = memory address of array lv1Feathers
+		la $s1, lv1FeathersAlive	# s1 = memory address of array lv1FeathersAlive
+		la $s2, featherInEffect		# s2 = memory address of boolean featherInEffect
+								# (0 = not in effect, 1 = in effect)
+		
+		j drawFeathersLoop
+
+drawFeathersLoop:
+		bge $t5, $t4, drawPlatforms	# start drawing platforms next if loop finishes
+		
+		# CHECK IF FEATHER IS STILL ALIVE (not picked up yet)
+		add $t6, $s1, $t5	# t6 is memory address of lv1FeathersAlive[iteration]
+		lw $t7, 0($t6)	# t7 = whether or not feather is still alive
+		beqz $t7, drawFeathersIterEnd	# if feather is not alive, skip checking player dist and drawing
+
+		# CHECK IF PLAYER IS NEAR FEATHER
+		add $t6, $s0, $t5	# t6 is memory address of lv1Feathers[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv1Feathers[iteration] on game screen
+		
+		li $t8, 16
+		add $t8, $t8, $t0
+		bge $t8, $t7, checkPlayerTouchFeather		# if player loc + 16 >= feather loc, player may be touching feather
+		
+		# ELSE, DRAW FEATHER
+		j drawFeatherOnScreen
+		
+checkPlayerTouchFeather:
+		# Assume $t7 set to location of lv1Feathers[iteration] from previous branch
+		li $t8, 28
+		add $t8, $t8, $t7
+		bge $t8, $t0, pickUpFeather		# if feather loc + 28 >= player loc AND
+								# player loc + 16 >= feather loc, player IS touching feather
+		
+		# IF PLAYER ISN'T TOUCHING FEATHER, DRAW
+		j drawFeatherOnScreen
+		
+pickUpFeather:
+		# SET FEATHERALIVE[iteration] TO 0
+		add $t6, $s1, $t5	# t6 is memory address of lv1FeathersAlive[iteration]
+		sw $zero, 0($t6)	# t7 = whether or not feather is still alive
+		
+		# SET FEATHER IN EFFECT TO 1
+		li $t7, 1
+		sb $t7, 0($s2)	# since s2 = memory address of boolean featherInEffect
+		
+		# UNDRAW FEATHER
+		jal undrawFeatherOnScreen
+		
+		j drawFeathersIterEnd		# end of iteration (no need to draw feather, since it's been picked up)
+		
+drawFeatherOnScreen:
+		add $t6, $s0, $t5	# t6 is memory address of lv1Feathers[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv1Feathers[iteration] on game screen
+		
+		# stem
+		li $t1, LIGHTORANGE
+		sw $t1, 0($t7)
+		sw $t1, -256($t7)
+		sw $t1, -508($t7)
+		
+		# feather white
+		li $t1, WHITE
+		sw $t1, -504($t7)
+		sw $t1, -500($t7)
+		sw $t1, -764($t7)
+		sw $t1, -1020($t7)
+		sw $t1, -1268($t7)
+		sw $t1, -1008($t7)
+		
+		# feather shade
+		li $t1, LIGHTGRAY
+		sw $t1, -1016($t7)
+		sw $t1, -1272($t7)
+		sw $t1, -756($t7)
+		sw $t1, -752($t7)
+		sw $t1, -1520($t7)
+		sw $t1, -1260($t7)
+		
+		# feather dark shade
+		li $t1, GRAY
+		sw $t1, -760($t7)
+		sw $t1, -1012($t7)
+		sw $t1, -1264($t7)
+		sw $t1, -1516($t7)
+		
+		j drawFeathersIterEnd
+				
+drawFeathersIterEnd:
+		addi $t5, $t5, 4	# increment # feathers handled * 4
+		j drawFeathersLoop
+
+# PREREQ: $s0 is the memory address of lv1Feathers[iteration]
+#		  $t5 is the iteration count * 4
+undrawFeatherOnScreen:
+		add $t6, $s0, $t5	# t6 is memory address of lv1Feathers[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv1Feathers[iteration] on game screen
+		
+		li $t1, 0x0	# black
+		
+		# stem
+		sw $t1, 0($t7)
+		sw $t1, -256($t7)
+		sw $t1, -508($t7)
+		# feather white
+		sw $t1, -504($t7)
+		sw $t1, -500($t7)
+		sw $t1, -764($t7)
+		sw $t1, -1020($t7)
+		sw $t1, -1268($t7)
+		sw $t1, -1008($t7)
+		# feather shade
+		sw $t1, -1016($t7)
+		sw $t1, -1272($t7)
+		sw $t1, -756($t7)
+		sw $t1, -752($t7)
+		sw $t1, -1520($t7)
+		sw $t1, -1260($t7)
+		# feather dark shade
+		sw $t1, -760($t7)
+		sw $t1, -1012($t7)
+		sw $t1, -1264($t7)
+		sw $t1, -1516($t7)
+		
+		jr $ra
 
 # PREREQ: none of the platforms are 6 or more units from the rightmost part of the screen
 # 		  nor 2 or more units from the bottom of the screen
 drawPlatforms:
 		# INITIALIZE REGISTERS FOR DRAWING PLATFORM LOOP
-		li $t1, BROWN	# t1 = BROWN
 		la $t8, lv1Platforms	# t8 = memory address of array lv1Platforms
 		li $t4, 8	# t4 = number of total platforms to draw * 4
 		li $t5, 0	# t5 = number of platforms drawn * 4
@@ -300,6 +438,7 @@ drawPlatformsLoop:
 		lw $t7, 0($t6)	# t7 = location of lv1Platforms[iteration] on game screen
 		
 		# DRAW PLATFORM (+6 units to the right)
+		li $t1, BROWN
 		sw $t1, 0($t7)
 		sw $t1, 4($t7)
 		sw $t1, 8($t7)
@@ -308,10 +447,11 @@ drawPlatformsLoop:
 		sw $t1, 20($t7)
 		
 		# DRAW PLATFORM SUPPORT (under)
-		#sw $t1, 260($t7)
-		#sw $t1, 264($t7)
-		#sw $t1, 268($t7)
-		#sw $t1, 272($t7)
+		li $t1, LIGHTBROWN
+		sw $t1, 260($t7)
+		sw $t1, 264($t7)
+		sw $t1, 268($t7)
+		sw $t1, 272($t7)
 		
 		addi $t5, $t5, 4	# increment # platforms drawn * 4
 		j drawPlatformsLoop
@@ -444,11 +584,16 @@ undrawPlatformUD:
 		sw $t1, 16($t7)
 		sw $t1, 20($t7)
 		
+		# UNDRAW PLATFORM SUPPORT (under)
+		sw $t1, 260($t7)
+		sw $t1, 264($t7)
+		sw $t1, 268($t7)
+		sw $t1, 272($t7)
+		
 		jr $ra
 
 drawPlatformsUD:
 		# INITIALIZE REGISTERS FOR DRAWING MOVING PLATFORMS (up-down)
-		li $t1, BROWN
 		li $t4, 8	# t4 = number of total platforms to draw * 4
 		li $t5, 0	# t5 = number of platforms drawn * 4
 		la $s0, lv1MovePlatformsUD	# s0 = memory address of array lv1MovePlatformsUD
@@ -495,12 +640,20 @@ movePlayerWithRaisingPlatform:
 		
 drawPlatformsUDIterEnd:
 		# DRAW PLATFORM (+6 units to the right)
+		li $t1, BROWN
 		sw $t1, 0($t8)
 		sw $t1, 4($t8)
 		sw $t1, 8($t8)
 		sw $t1, 12($t8)
 		sw $t1, 16($t8)
 		sw $t1, 20($t8)
+		
+		# DRAW PLATFORM SUPPORT (under)
+		li $t1, LIGHTBROWN
+		sw $t1, 260($t8)
+		sw $t1, 264($t8)
+		sw $t1, 268($t8)
+		sw $t1, 272($t8)
 		
 		addi $t5, $t5, 4	# increment # platforms drawn * 4
 		j drawPlatformsUDLoop
@@ -630,11 +783,16 @@ undrawPlatformLR:
 		sw $t1, 16($t7)
 		sw $t1, 20($t7)
 		
+		# UNDRAW PLATFORM SUPPORT (under)
+		sw $t1, 260($t7)
+		sw $t1, 264($t7)
+		sw $t1, 268($t7)
+		sw $t1, 272($t7)
+		
 		jr $ra
 		
 drawPlatformsLR:
 		# INITIALIZE REGISTERS FOR DRAWING MOVING PLATFORMS (left-right)
-		li $t1, BROWN
 		li $t4, 4	# t4 = number of total platforms to draw * 4
 		li $t5, 0	# t5 = number of platforms drawn * 4
 		la $s0, lv1MovePlatformsLR	# s0 = memory address of array lv1MovePlatformsLR
@@ -661,12 +819,20 @@ drawPlatformsLRLoop:
 		add $t8, $t8, $t6		# t8 = location of moving platform + (horizontal unit offset)
 		
 		# DRAW PLATFORM (+6 units to the right)
+		li $t1, BROWN
 		sw $t1, 0($t8)
 		sw $t1, 4($t8)
 		sw $t1, 8($t8)
 		sw $t1, 12($t8)
 		sw $t1, 16($t8)
 		sw $t1, 20($t8)
+		
+		# DRAW PLATFORM SUPPORT (under)
+		li $t1, LIGHTBROWN
+		sw $t1, 260($t8)
+		sw $t1, 264($t8)
+		sw $t1, 268($t8)
+		sw $t1, 272($t8)
 		
 		addi $t5, $t5, 4	# increment # platforms drawn * 4
 		j drawPlatformsLRLoop
