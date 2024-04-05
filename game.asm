@@ -56,7 +56,7 @@ playerHealth:	.byte		3
 # locations of static platforms
 lv1Platforms:	.word	0x1000B9B0, 0x1000B294, 0x1000AF5C, 0x1000B23C, 0x1000A75C, 0x10008DC4
 lv1NumPlatforms:	.byte		24	# num platforms * 4
-lv2Platforms:	.word	0x1000B9B0
+lv2Platforms:	.word	0x1000BBC4
 lv2NumPlatforms:	.byte		4	# num platforms * 4
 lv3Platforms:	.word	0x1000B9B0
 lv3NumPlatforms:	.byte		4	# num platforms * 4
@@ -137,7 +137,7 @@ curNumHourglasses:	.byte		0
 
 hourglassInEffect:	.byte		0
 hourglassStartTime:	.word	0
-platformMoveFrequency:	.byte		6
+platformMoveFrequency:	.byte		4
 
 # locations of hearts pickups (adds health if player needs it)
 lv1Hearts:	.word	0x1000A318
@@ -239,8 +239,7 @@ beatLevel:
 		addi $t4, $t4, 1
 		sb $t4, currentLv
 		
-		# TODO: bottom of scrn
-		li $t0, 0x1000BE28	# update position of player to bottom of screen + 1 row (since level restarted)
+		li $t0, 0x1000BEC8	# update position of player to bottom of screen + 1 row (since level restarted)
 		move $t3, $t0	# update temp player pos to match t0
 		li $t2, 12	# update velocity to be "jumping" initially
 		li $t9, 0	# initialize game tick to 0
@@ -772,14 +771,14 @@ processHourglassEffect:
 									# hourglass effect is finished
 									
 		# SET PLATFORM MOVE FREQUENCY TO 18 (triple of normal freq)
-		li $t7, 18
+		li $t7, 12
 		sb $t7, platformMoveFrequency
 		
 		j drawHourglassesLoop
 		
 disableHourglassEffect:
-		# SET PLATFORM MOVE FREQUENCY TO 6 (normal freq)
-		li $t7, 6
+		# SET PLATFORM MOVE FREQUENCY TO 4 (normal freq)
+		li $t7, 4
 		sb $t7, platformMoveFrequency
 
 		sb $zero, 0($s2)	# set hourglassInEffect to 0
