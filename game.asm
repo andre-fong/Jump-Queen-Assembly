@@ -74,6 +74,9 @@ featherInEffect:	.byte		0
 lv1Hourglasses:	.word	0x1000A888
 lv1HourglassesAlive:	.word	1
 hourglassInEffect:	.byte		0
+hourglassStartTime:	.word	0
+
+platformMoveFrequency:	.byte		6
 
 currentLv:		.word	1 # TODO
 
@@ -469,8 +472,34 @@ drawHourglasses:
 		la $s1, lv1HourglassesAlive	# s1 = memory address of array lv1HourglassesAlive
 		la $s2, hourglassInEffect		# s2 = memory address of boolean hourglassInEffect
 								# (0 = not in effect, 1 = in effect)
+		la $s3, hourglassStartTime	# s3 = time that hourglass was picked up
+		
+		# IF HOURGLASS IN EFFECT, PROCESS EFFECT FIRST
+		lb $t6, 0($s2)	# t6 = whether or not hourglass effect is currently active
+		bnez $t6, processHourglassEffect
 		
 		j drawHourglassesLoop
+		
+processHourglassEffect:
+		lw $t6, 0($s3)	# t6 = hourglass effect start time
+		addi $t6, $t6, 250
+		bgt $t9, $t6, disableHourglassEffect	# if game tick > hourglass effect start time + 250, 
+									# hourglass effect is finished
+									
+		# SET PLATFORM MOVE FREQUENCY TO 18 (triple of normal freq)
+		li $t7, 18
+		sb $t7, platformMoveFrequency
+		
+		j drawHourglassesLoop
+		
+disableHourglassEffect:
+		# SET PLATFORM MOVE FREQUENCY TO 6 (normal freq)
+		li $t7, 6
+		sb $t7, platformMoveFrequency
+
+		sb $zero, 0($s2)	# set hourglassInEffect to 0
+		j drawHourglassesLoop
+
 drawHourglassesLoop:
 		bge $t5, $t4, drawHearts	# start drawing hearts next if loop finishes
 		
@@ -515,6 +544,9 @@ pickUpHourglass:
 		# SET HOURGLASS IN EFFECT TO 1
 		li $t7, 1
 		sb $t7, 0($s2)	# since s2 = memory address of boolean hourglassInEffect
+		
+		# SET HOURGLASS START TIME TO CURRENT GAME TICK
+		sw $t9, 0($s3)
 		
 		# UNDRAW HOURGLASS
 		jal undrawHourglassOnScreen
@@ -638,8 +670,9 @@ drawPlatformsLoop:
 
 # UP TO DOWN ########################
 movePlatformsUD:
-		# IF GAME TICK NOT DIVISIBLE BY 6, SKIP PLATFORM MOVING LOGIC AND DRAW MOVING PLATFORMS
-		li $t6, 6
+		# IF GAME TICK NOT DIVISIBLE BY PLATFORM MOVE FREQUENCY, 
+		# SKIP PLATFORM MOVING LOGIC AND DRAW MOVING PLATFORMS
+		lb $t6, platformMoveFrequency
 		div $t9, $t6
 		mfhi $t7
 		bnez $t7, drawPlatformsUD
@@ -841,8 +874,9 @@ drawPlatformsUDIterEnd:
 		
 # LEFT TO RIGHT ###########
 movePlatformsLR:
-		# IF GAME TICK NOT DIVISIBLE BY 6, SKIP PLATFORM MOVING LOGIC AND DRAW MOVING PLATFORMS
-		li $t6, 6
+		# IF GAME TICK NOT DIVISIBLE BY PLATFORM MOVE FREQUENCY, 
+		# SKIP PLATFORM MOVING LOGIC AND DRAW MOVING PLATFORMS
+		lb $t6, platformMoveFrequency
 		div $t9, $t6
 		mfhi $t7
 		bnez $t7, drawPlatformsLR
