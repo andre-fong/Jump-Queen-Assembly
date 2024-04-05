@@ -14,7 +14,7 @@
 #
 # Which milestones have been reached in this submission?
 # (See the assignment handout for descriptions of the milestones)
-# - Milestone 1/2/3/4 (choose the one the applies)
+# - Milestone 1,2,3,4 (ALL)
 #
 # Which approved features have been implemented for milestone 3? TODO
 # (See the assignment handout for the list of additional features)
@@ -51,43 +51,110 @@
 .eqv DARKGRAY 0x535353
 
 .data
-playerHealth:	.byte		2	# TODO
+playerHealth:	.byte		3
 
 # locations of static platforms
-lv1Platforms:	.word	0x1000BB28, 0x1000B088	# TODO
+lv1Platforms:	.word	0x1000B9B0, 0x1000B294, 0x1000AF5C, 0x1000B23C, 0x1000A75C, 0x10008DC4
+lv1NumPlatforms:	.byte		24	# num platforms * 4
+lv2Platforms:	.word	0x1000B9B0
+lv2NumPlatforms:	.byte		4	# num platforms * 4
+lv3Platforms:	.word	0x1000B9B0
+lv3NumPlatforms:	.byte		4	# num platforms * 4
+curPlatformsAddr:	.word	0x0
+curNumPlatforms:	.byte		0	# CURRENT LV'S number of static platforms
 
 # locations of moving platforms (up-down)
-lv1MovePlatformsUD:	.word	0x1000B728, 0x1000A728
+lv1MovePlatformsUD:	.word	0x1000AA14, 0x1000A07C, 0x10009BA4
+lv2MovePlatformsUD:	.word	0x1000AA14
+lv3MovePlatformsUD:	.word	0x1000AA14
+curMovePlatformsUDAddr:	.word	0
 # move progress of respective platform (0 to 5)
-lv1MovePlatformsUDProg:	.word		0, 5
+lv1MovePlatformsUDProg:	.word		0, 5, 0
+lv2MovePlatformsUDProg:	.word		0
+lv3MovePlatformsUDProg:	.word		0
+curMovePlatformsUDProgAddr:	.word	0
 # 0 = lowering, 1 = raising, 2+ = waiting
-lv1MovePlatformsUDState:	.word		0, 1
+lv1MovePlatformsUDState:	.word		0, 1, 0
+lv2MovePlatformsUDState:	.word		0
+lv3MovePlatformsUDState:	.word		0
+curMovePlatformsUDStateAddr:	.word	0
+lv1NumMovePlatformsUD:	.byte		12	# num platforms UD * 4
+lv2NumMovePlatformsUD:	.byte		0	# num platforms UD * 4
+lv3NumMovePlatformsUD:	.byte		0	# num platforms UD * 4
+curNumMovePlatformsUD:	.byte		0	# CURRENT LV'S number of up-down platforms
 
 # locations of moving platforms (left-right)
 lv1MovePlatformsLR:	.word	0x1000B788	# TODO
+lv2MovePlatformsLR:	.word	0x1000B788	# TODO
+lv3MovePlatformsLR:	.word	0x1000B788	# TODO
+curMovePlatformsLRAddr:	.word	0
 # move progress of respective platform (0 to 7)
 lv1MovePlatformsLRProg:	.word		0
+lv2MovePlatformsLRProg:	.word		0
+lv3MovePlatformsLRProg:	.word		0
+curMovePlatformsLRProgAddr:	.word	0
 # 0 = moving left, 1 = moving right, 2+ = waiting
 lv1MovePlatformsLRState:	.word		0
+lv2MovePlatformsLRState:	.word		0
+lv3MovePlatformsLRState:	.word		0
+curMovePlatformsLRStateAddr:	.word	0
+lv1NumMovePlatformsLR:	.byte		0	# num platforms LR * 4
+lv2NumMovePlatformsLR:	.byte		0	# num platforms LR * 4
+lv3NumMovePlatformsLR:	.byte		0	# num platforms LR * 4
+curNumMovePlatformsLR:	.byte		0	# CURRENT LV'S number of left-right platforms
 
 # locations of feather pickups (increases jumping power)
 lv1Feathers:	.word	0x1000A128
 lv1FeathersAlive:	.word	1
+lv1NumFeathers:	.byte		0	# num feathers * 4
+lv2Feathers:	.word	0x1000A128
+lv2FeathersAlive:	.word	1
+lv2NumFeathers:	.byte		0	# num feathers * 4
+lv3Feathers:	.word	0x1000A128
+lv3FeathersAlive:	.word	1
+lv3NumFeathers:	.byte		0	# num feathers * 4
+
+curFeathersAddr:	.word	0
+curFeathersAliveAddr:		.word	0
+curNumFeathers:	.byte		0
+
 featherInEffect:	.byte		0
 
 # locations of hourglass pickups (slow down time)
 lv1Hourglasses:	.word	0x1000A888
 lv1HourglassesAlive:	.word	1
+lv1NumHourglasses:	.byte		0	# num hourglasses * 4
+lv2Hourglasses:	.word	0x1000A888
+lv2HourglassesAlive:	.word	1
+lv2NumHourglasses:	.byte		0	# num hourglasses * 4
+lv3Hourglasses:	.word	0x1000A888
+lv3HourglassesAlive:	.word	1
+lv3NumHourglasses:	.byte		0	# num hourglasses * 4
+
+curHourglassesAddr:	.word	0
+curHourglassesAliveAddr:		.word	0
+curNumHourglasses:	.byte		0
+
 hourglassInEffect:	.byte		0
 hourglassStartTime:	.word	0
-
 platformMoveFrequency:	.byte		6
 
 # locations of hearts pickups (adds health if player needs it)
-lv1Hearts:	.word	0x1000B694
+lv1Hearts:	.word	0x1000A318
 lv1HeartsAlive:	.word	1
+lv1NumHearts:	.byte		4	# num heart pickups * 4
+lv2Hearts:	.word	0x1000A318
+lv2HeartsAlive:	.word	1
+lv2NumHearts:	.byte		4	# num heart pickups * 4
+lv3Hearts:	.word	0x1000A318
+lv3HeartsAlive:	.word	1
+lv3NumHearts:	.byte		4	# num heart pickups * 4
 
-currentLv:		.word	1 # TODO
+curHeartsAddr:	.word	0
+curHeartsAliveAddr:		.word	0
+curNumHearts:	.byte		0
+
+currentLv:		.byte		1
 
 .text
 main:	# IMPORTANT TEMP REGISTERS: t0 (PLAYER LOCATION), t1 (COLOR), 
@@ -106,10 +173,219 @@ main:	# IMPORTANT TEMP REGISTERS: t0 (PLAYER LOCATION), t1 (COLOR),
 		# INITIALIZE GAME TICK TO 0 (inc. by 1 every iteration)
 		li $t9, 0
 		
-		j drawPlayer
+		# INITIALIZE *CURRENT LV*'s ADDRESSES AND VALUES
+		
+		# static platforms
+		la $t4, lv1Platforms
+		sw $t4, curPlatformsAddr
+		lb $t5, lv1NumPlatforms
+		sb $t5, curNumPlatforms
+		
+		# UD platforms
+		la $t4, lv1MovePlatformsUD
+		sw $t4, curMovePlatformsUDAddr
+		la $t5, lv1MovePlatformsUDProg
+		sw $t5, curMovePlatformsUDProgAddr
+		la $t6, lv1MovePlatformsUDState
+		sw $t6, curMovePlatformsUDStateAddr
+		lb $t7, lv1NumMovePlatformsUD
+		sb $t7, curNumMovePlatformsUD
+		
+		# LR platforms
+		la $t4, lv1MovePlatformsLR
+		sw $t4, curMovePlatformsLRAddr
+		la $t5, lv1MovePlatformsLRProg
+		sw $t5, curMovePlatformsLRProgAddr
+		la $t6, lv1MovePlatformsLRState
+		sw $t6, curMovePlatformsLRStateAddr
+		lb $t7, lv1NumMovePlatformsLR
+		sb $t7, curNumMovePlatformsLR
+		
+		# feathers
+		la $t4, lv1Feathers
+		sw $t4, curFeathersAddr
+		la $t5, lv1FeathersAlive
+		sw $t5, curFeathersAliveAddr
+		lb $t6, lv1NumFeathers
+		sb $t6, curNumFeathers
+		
+		# hourglasses
+		la $t4, lv1Hourglasses
+		sw $t4, curHourglassesAddr
+		la $t5, lv1HourglassesAlive
+		sw $t5, curHourglassesAliveAddr
+		lb $t6, lv1NumHourglasses
+		sb $t6, curNumHourglasses
+		
+		# hearts
+		la $t4, lv1Hearts
+		sw $t4, curHeartsAddr
+		la $t5, lv1HeartsAlive
+		sw $t5, curHeartsAliveAddr
+		lb $t6, lv1NumHearts
+		sb $t6, curNumHearts
+		
+		j undrawPlayer
+
+beatLevel:
+		# GET LEVEL
+		lb $t4, currentLv
+		
+		# IF ALL LEVELS BEATEN, WIN GAME
+		li $t5, 3
+		beq $t4, $t5, winGame
+		
+		# ELSE, INCREMENT LEVEL AND UPDATE CURRENT LV'S ADDRESSES AND VALUES
+		addi $t4, $t4, 1
+		sb $t4, currentLv
+		
+		# TODO: bottom of scrn
+		li $t0, 0x1000BE28	# update position of player to bottom of screen + 1 row (since level restarted)
+		move $t3, $t0	# update temp player pos to match t0
+		li $t2, 12	# update velocity to be "jumping" initially
+		li $t9, 0	# initialize game tick to 0
+		
+		beq $t4, $t5, beatSecondLevel	# if cur level + 1 = 3, we just beat second level
+		
+		# otherwise, we just beat first level
+		# static platforms
+		la $t4, lv2Platforms
+		sw $t4, curPlatformsAddr
+		lb $t5, lv2NumPlatforms
+		sb $t5, curNumPlatforms
+		
+		# UD platforms
+		la $t4, lv2MovePlatformsUD
+		sw $t4, curMovePlatformsUDAddr
+		la $t5, lv2MovePlatformsUDProg
+		sw $t5, curMovePlatformsUDProgAddr
+		la $t6, lv2MovePlatformsUDState
+		sw $t6, curMovePlatformsUDStateAddr
+		lb $t7, lv2NumMovePlatformsUD
+		sb $t7, curNumMovePlatformsUD
+		
+		# LR platforms
+		la $t4, lv2MovePlatformsLR
+		sw $t4, curMovePlatformsLRAddr
+		la $t5, lv2MovePlatformsLRProg
+		sw $t5, curMovePlatformsLRProgAddr
+		la $t6, lv2MovePlatformsLRState
+		sw $t6, curMovePlatformsLRStateAddr
+		lb $t7, lv2NumMovePlatformsLR
+		sb $t7, curNumMovePlatformsLR
+		
+		# feathers
+		la $t4, lv2Feathers
+		sw $t4, curFeathersAddr
+		la $t5, lv2FeathersAlive
+		sw $t5, curFeathersAliveAddr
+		lb $t6, lv2NumFeathers
+		sb $t6, curNumFeathers
+		
+		# hourglasses
+		la $t4, lv2Hourglasses
+		sw $t4, curHourglassesAddr
+		la $t5, lv2HourglassesAlive
+		sw $t5, curHourglassesAliveAddr
+		lb $t6, lv2NumHourglasses
+		sb $t6, curNumHourglasses
+		
+		# hearts
+		la $t4, lv2Hearts
+		sw $t4, curHeartsAddr
+		la $t5, lv2HeartsAlive
+		sw $t5, curHeartsAliveAddr
+		lb $t6, lv2NumHearts
+		sb $t6, curNumHearts
+		
+		j undrawScreen	# undraw screen to prepare for drawing next level
+		
+beatSecondLevel:
+		# static platforms
+		la $t4, lv3Platforms
+		sw $t4, curPlatformsAddr
+		lb $t5, lv3NumPlatforms
+		sb $t5, curNumPlatforms
+		
+		# UD platforms
+		la $t4, lv3MovePlatformsUD
+		sw $t4, curMovePlatformsUDAddr
+		la $t5, lv3MovePlatformsUDProg
+		sw $t5, curMovePlatformsUDProgAddr
+		la $t6, lv3MovePlatformsUDState
+		sw $t6, curMovePlatformsUDStateAddr
+		lb $t7, lv3NumMovePlatformsUD
+		sb $t7, curNumMovePlatformsUD
+		
+		# LR platforms
+		la $t4, lv3MovePlatformsLR
+		sw $t4, curMovePlatformsLRAddr
+		la $t5, lv3MovePlatformsLRProg
+		sw $t5, curMovePlatformsLRProgAddr
+		la $t6, lv3MovePlatformsLRState
+		sw $t6, curMovePlatformsLRStateAddr
+		lb $t7, lv3NumMovePlatformsLR
+		sb $t7, curNumMovePlatformsLR
+		
+		# feathers
+		la $t4, lv3Feathers
+		sw $t4, curFeathersAddr
+		la $t5, lv3FeathersAlive
+		sw $t5, curFeathersAliveAddr
+		lb $t6, lv3NumFeathers
+		sb $t6, curNumFeathers
+		
+		# hourglasses
+		la $t4, lv3Hourglasses
+		sw $t4, curHourglassesAddr
+		la $t5, lv3HourglassesAlive
+		sw $t5, curHourglassesAliveAddr
+		lb $t6, lv3NumHourglasses
+		sb $t6, curNumHourglasses
+		
+		# hearts
+		la $t4, lv3Hearts
+		sw $t4, curHeartsAddr
+		la $t5, lv3HeartsAlive
+		sw $t5, curHeartsAliveAddr
+		lb $t6, lv3NumHearts
+		sb $t6, curNumHearts
+		
+		j undrawScreen	# undraw screen to prepare for drawing next level
+		
+undrawScreen:
+		# INITIALIZE REGISTERS TO PREPARE FOR UNDRAW SCREEN LOOP
+		li $t4, BASE_ADDRESS
+		addi $t4, $t4, 16380	# t4 = bottom rightmost unit on screen
+		li $t5, BASE_ADDRESS		# t5 = current unit to erase
+		li $t1, 0x0	# black
+		
+		j undrawScreenLoop
+undrawScreenLoop:
+		bge $t5, $t4, undrawPlayer		# draw all assets once screen is done being reset to black
+		
+		sw $t1, 0($t5)	# set unit color to black
+		
+		addi $t5, $t5, 4	# increment by 4
+		j undrawScreenLoop
+		
+winGame:	#TODO
+		j QUIT
+		
+loseLevel:	#TODO
+		j QUIT
+
+loseGame:	#TODO
+		j QUIT
 
 gameLoop:
-		# TODO: CHECK IF PLAYER AT VERY TOP (CLEARED LEVEL)
+		# CHECK IF PLAYER AT VERY TOP (CLEARED LEVEL)
+		addi $t4, $t0, -2048	# top leftmost player unit
+		
+		li $t5, 252
+		addi $t6, $t5, BASE_ADDRESS	# t6 = rightmost unit on first row
+		ble $t4, $t6, beatLevel	# if the player's topmost unit is on the first row of the screen,
+							# we beat the current level
 		
 		# SET T3 (temp new player location) TO CURRENT PLAYER LOCATION
 		move $t3, $t0
@@ -169,7 +445,7 @@ respondToUp:
 		beq $t5, $t6, respondToUpWithFeather
 		
 		# SET VERTICAL VELOCITY TO t2 (CANNOT SET TO VELOCITY THAT IS INDIVISIBLE BY FALL SPD)
-		li $t2, 21	# adjust for QoL
+		li $t2, 18	# adjust for QoL
 		
 		j updateLocation
 		
@@ -341,10 +617,10 @@ drawBackground:
 
 drawFeathers:
 		# INITIALIZE REGISTERS FOR DRAWING FEATHERS LOOP
-		li $t4, 4	# t4 = number of total feathers to draw * 4
+		lb $t4, curNumFeathers	# t4 = number of total feathers to draw * 4
 		li $t5, 0	# t5 = number of feathers drawn * 4
-		la $s0, lv1Feathers	# s0 = memory address of array lv1Feathers
-		la $s1, lv1FeathersAlive	# s1 = memory address of array lv1FeathersAlive
+		lw $s0, curFeathersAddr	# s0 = memory address of array lv(x)feathers
+		lw $s1, curFeathersAliveAddr	# s1 = memory address of array lv(x)FeathersAlive
 		la $s2, featherInEffect		# s2 = memory address of boolean featherInEffect
 								# (0 = not in effect, 1 = in effect)
 		
@@ -354,13 +630,13 @@ drawFeathersLoop:
 		bge $t5, $t4, drawHourglasses	# start drawing hourglasses next if loop finishes
 		
 		# CHECK IF FEATHER IS STILL ALIVE (not picked up yet)
-		add $t6, $s1, $t5	# t6 is memory address of lv1FeathersAlive[iteration]
+		add $t6, $s1, $t5	# t6 is memory address of lv(x)FeathersAlive[iteration]
 		lw $t7, 0($t6)	# t7 = whether or not feather is still alive
 		beqz $t7, drawFeathersIterEnd	# if feather is not alive, skip checking player dist and drawing
 
 		# CHECK IF PLAYER IS NEAR FEATHER
-		add $t6, $s0, $t5	# t6 is memory address of lv1Feathers[iteration]
-		lw $t7, 0($t6)	# t7 = location of lv1Feathers[iteration] on game screen
+		add $t6, $s0, $t5	# t6 is memory address of lv(x)Feathers[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv(x)Feathers[iteration] on game screen
 		
 		li $t8, 16
 		add $t8, $t8, $t0
@@ -375,7 +651,7 @@ drawFeathersLoop:
 		j drawFeatherOnScreen
 		
 checkPlayerTouchFeather:
-		# Assume $t7 set to location of lv1Feathers[iteration] from previous branch
+		# Assume $t7 set to location of lv(x)Feathers[iteration] from previous branch
 		li $t8, 28
 		add $t8, $t8, $t7
 		bge $t8, $t0, pickUpFeather		# if feather loc + 28 >= player loc AND
@@ -386,7 +662,7 @@ checkPlayerTouchFeather:
 		
 pickUpFeather:
 		# SET FEATHERALIVE[iteration] TO 0
-		add $t6, $s1, $t5	# t6 is memory address of lv1FeathersAlive[iteration]
+		add $t6, $s1, $t5	# t6 is memory address of lv(x)FeathersAlive[iteration]
 		sw $zero, 0($t6)	
 		
 		# SET FEATHER IN EFFECT TO 1
@@ -399,8 +675,8 @@ pickUpFeather:
 		j drawFeathersIterEnd		# end of iteration (no need to draw feather, since it's been picked up)
 		
 drawFeatherOnScreen:
-		add $t6, $s0, $t5	# t6 is memory address of lv1Feathers[iteration]
-		lw $t7, 0($t6)	# t7 = location of lv1Feathers[iteration] on game screen
+		add $t6, $s0, $t5	# t6 is memory address of lv(x)Feathers[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv(x)Feathers[iteration] on game screen
 		
 		# stem
 		li $t1, LIGHTORANGE
@@ -439,11 +715,11 @@ drawFeathersIterEnd:
 		addi $t5, $t5, 4	# increment # feathers handled * 4
 		j drawFeathersLoop
 
-# PREREQ: $s0 is the memory address of lv1Feathers[iteration]
+# PREREQ: $s0 is the memory address of lv(x)Feathers[iteration]
 #		  $t5 is the iteration count * 4
 undrawFeatherOnScreen:
-		add $t6, $s0, $t5	# t6 is memory address of lv1Feathers[iteration]
-		lw $t7, 0($t6)	# t7 = location of lv1Feathers[iteration] on game screen
+		add $t6, $s0, $t5	# t6 is memory address of lv(x)Feathers[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv(x)Feathers[iteration] on game screen
 		
 		li $t1, 0x0	# black
 		
@@ -475,10 +751,10 @@ undrawFeatherOnScreen:
 		
 drawHourglasses:
 		# INITIALIZE REGISTERS FOR DRAWING HOURGLASSES LOOP
-		li $t4, 4	# t4 = number of total hourglasses to draw * 4
+		lb $t4, curNumHourglasses	# t4 = number of total hourglasses to draw * 4
 		li $t5, 0	# t5 = number of hourglasses drawn * 4
-		la $s0, lv1Hourglasses	# s0 = memory address of array lv1Hourglasses
-		la $s1, lv1HourglassesAlive	# s1 = memory address of array lv1HourglassesAlive
+		lw $s0, curHourglassesAddr	# s0 = memory address of array lv(x)Hourglasses
+		lw $s1, curHourglassesAliveAddr	# s1 = memory address of array lv(x)HourglassesAlive
 		la $s2, hourglassInEffect		# s2 = memory address of boolean hourglassInEffect
 								# (0 = not in effect, 1 = in effect)
 		la $s3, hourglassStartTime	# s3 = time that hourglass was picked up
@@ -513,13 +789,13 @@ drawHourglassesLoop:
 		bge $t5, $t4, drawHeartPickups	# start drawing heart pickups next if loop finishes
 		
 		# CHECK IF HOURGLASS IS STILL ALIVE (not picked up yet)
-		add $t6, $s1, $t5	# t6 is memory address of lv1HourglassesAlive[iteration]
+		add $t6, $s1, $t5	# t6 is memory address of lv(x)HourglassesAlive[iteration]
 		lw $t7, 0($t6)	# t7 = whether or not hourglass is still alive
 		beqz $t7, drawHourglassesIterEnd	# if hourglass is not alive, skip checking player dist and drawing
 
 		# CHECK IF PLAYER IS NEAR HOURGLASS
-		add $t6, $s0, $t5	# t6 is memory address of lv1Hourglasses[iteration]
-		lw $t7, 0($t6)	# t7 = location of lv1Hourglasses[iteration] on game screen
+		add $t6, $s0, $t5	# t6 is memory address of lv(x)Hourglasses[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv(x)Hourglasses[iteration] on game screen
 		
 		li $t8, 16
 		add $t8, $t8, $t0
@@ -535,8 +811,8 @@ drawHourglassesLoop:
 		j drawHourglassOnScreen
 
 checkPlayerTouchHourglass:
-		# Assume $t7 set to location of lv1Hourglasses[iteration] 
-		# OR lv1Hourglasses[iteration] + one row, from previous branch
+		# Assume $t7 set to location of lv(x)Hourglasses[iteration] 
+		# OR lv(x)Hourglasses[iteration] + one row, from previous branch
 		li $t8, 20
 		add $t8, $t8, $t7
 		bge $t8, $t0, pickUpHourglass		# if hourglass loc + 20 >= player loc AND
@@ -547,7 +823,7 @@ checkPlayerTouchHourglass:
 
 pickUpHourglass:
 		# SET HOURGLASSALIVE[iteration] TO 0
-		add $t6, $s1, $t5	# t6 is memory address of lv1HourglassesAlive[iteration]
+		add $t6, $s1, $t5	# t6 is memory address of lv(x)HourglassesAlive[iteration]
 		sw $zero, 0($t6)
 		
 		# SET HOURGLASS IN EFFECT TO 1
@@ -563,8 +839,8 @@ pickUpHourglass:
 		j drawHourglassesIterEnd		# end of iteration (no need to draw hourglass, since it's been picked up)
 		
 drawHourglassOnScreen:
-		add $t6, $s0, $t5	# t6 is memory address of lv1Hourglasses[iteration]
-		lw $t7, 0($t6)	# t7 = location of lv1Hourglasses[iteration] on game screen
+		add $t6, $s0, $t5	# t6 is memory address of lv(x)Hourglasses[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv(x)Hourglasses[iteration] on game screen
 		
 		# top and bottom cap
 		li $t1, DARKORANGE
@@ -603,11 +879,11 @@ drawHourglassesIterEnd:
 		addi $t5, $t5, 4	# increment # hourglasses handled * 4
 		j drawHourglassesLoop
 
-# PREREQ: $s0 is the memory address of lv1Hourglasses[iteration]
+# PREREQ: $s0 is the memory address of lv(x)Hourglasses[iteration]
 #		  $t5 is the iteration count * 4
 undrawHourglassOnScreen:
-		add $t6, $s0, $t5	# t6 is memory address of lv1Hourglasses[iteration]
-		lw $t7, 0($t6)	# t7 = location of lv1Hourglasses[iteration] on game screen
+		add $t6, $s0, $t5	# t6 is memory address of lv(x)Hourglasses[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv(x)Hourglasses[iteration] on game screen
 		
 		li $t1, 0x0	# black
 		
@@ -641,10 +917,10 @@ undrawHourglassOnScreen:
 
 drawHeartPickups:
 		# INITIALIZE REGISTERS FOR DRAWING HEARTS LOOP
-		li $t4, 4	# t4 = number of total heart pickups to draw * 4
+		lb $t4, curNumHearts	# t4 = number of total heart pickups to draw * 4
 		li $t5, 0	# t5 = number of heart pickups drawn * 4
-		la $s0, lv1Hearts	# s0 = memory address of array lv1Hearts
-		la $s1, lv1HeartsAlive	# s1 = memory address of array lv1HeartsAlive
+		lw $s0, curHeartsAddr	# s0 = memory address of array lv(x)Hearts
+		lw $s1, curHeartsAliveAddr	# s1 = memory address of array lv(x)HeartsAlive
 		
 		j drawHeartsLoop
 
@@ -652,7 +928,7 @@ drawHeartsLoop:
 		bge $t5, $t4, drawPlatforms		# start drawing platforms next if loop finishes
 		
 		# CHECK IF HEART IS STILL ALIVE (not picked up yet)
-		add $t6, $s1, $t5	# t6 is memory address of lv1HeartsAlive[iteration]
+		add $t6, $s1, $t5	# t6 is memory address of lv(x)HeartsAlive[iteration]
 		lw $t7, 0($t6)	# t7 = whether or not heart is still alive
 		beqz $t7, drawHeartsIterEnd	# if heart is not alive, skip checking player dist and drawing
 		
@@ -662,8 +938,8 @@ drawHeartsLoop:
 		beq $t8, $t7, drawHeartOnScreen		# if player doesn't need heart, draw it and ignore checking
 
 		# CHECK IF PLAYER IS NEAR HEART
-		add $t6, $s0, $t5	# t6 is memory address of lv1Hearts[iteration]
-		lw $t7, 0($t6)	# t7 = location of lv1Hearts[iteration] on game screen
+		add $t6, $s0, $t5	# t6 is memory address of lv(x)Hearts[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv(x)Hearts[iteration] on game screen
 		
 		li $t8, 16
 		add $t8, $t8, $t0
@@ -679,7 +955,7 @@ drawHeartsLoop:
 		j drawHeartOnScreen
 		
 checkPlayerTouchHeart:
-		# Assume $t7 set to location of lv1Hearts[iteration] from previous branch
+		# Assume $t7 set to location of lv(x)Hearts[iteration] from previous branch
 		li $t8, 16
 		add $t8, $t8, $t7
 		bge $t8, $t0, pickUpHeart		# if heart loc + 16 >= player loc AND
@@ -690,7 +966,7 @@ checkPlayerTouchHeart:
 		
 pickUpHeart:
 		# SET HEARTALIVE[iteration] TO 0
-		add $t6, $s1, $t5	# t6 is memory address of lv1HeartsAlive[iteration]
+		add $t6, $s1, $t5	# t6 is memory address of lv(x)HeartsAlive[iteration]
 		sw $zero, 0($t6)	
 		
 		# INCREMENT PLAYER HEALTH
@@ -704,8 +980,8 @@ pickUpHeart:
 		j drawHeartsIterEnd		# end of iteration (no need to draw heart, since it's been picked up)
 
 drawHeartOnScreen:
-		add $t6, $s0, $t5	# t6 is memory address of lv1Hearts[iteration]
-		lw $t7, 0($t6)	# t7 = location of lv1Hearts[iteration] on game screen
+		add $t6, $s0, $t5	# t6 is memory address of lv(x)Hearts[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv(x)Hearts[iteration] on game screen
 		
 		# heart
 		li $t1, RED
@@ -722,15 +998,11 @@ drawHeartsIterEnd:
 		addi $t5, $t5, 4	# increment # hearts handled * 4
 		j drawHeartsLoop
 		
-# PREREQ: $s0 is the memory address of lv1Hearts[iteration]
+# PREREQ: $s0 is the memory address of lv(x)Hearts[iteration]
 #		  $t5 is the iteration count * 4
 undrawHeartOnScreen:
-		li $v0, 1	# TODO
-		li $a0, 99999
-		syscall
-
-		add $t6, $s0, $t5	# t6 is memory address of lv1Hearts[iteration]
-		lw $t7, 0($t6)	# t7 = location of lv1Hearts[iteration] on game screen
+		add $t6, $s0, $t5	# t6 is memory address of lv(x)Hearts[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv(x)Hearts[iteration] on game screen
 		
 		li $t1, 0x0	# black
 		
@@ -748,8 +1020,8 @@ undrawHeartOnScreen:
 # 		  nor 2 or more units from the bottom of the screen
 drawPlatforms:
 		# INITIALIZE REGISTERS FOR DRAWING PLATFORM LOOP
-		la $t8, lv1Platforms	# t8 = memory address of array lv1Platforms
-		li $t4, 8	# t4 = number of total platforms to draw * 4
+		lw $t8, curPlatformsAddr	# t8 = memory address of array lv(x)Platforms
+		lb $t4, curNumPlatforms	# t4 = number of total platforms to draw * 4
 		li $t5, 0	# t5 = number of platforms drawn * 4
 		
 		j drawPlatformsLoop
@@ -757,8 +1029,8 @@ drawPlatforms:
 drawPlatformsLoop:
 		bge $t5, $t4, movePlatformsUD	# start moving platforms (up-down) next if loop finishes
 		
-		add $t6, $t8, $t5	# t6 is memory address of lv1Platforms[iteration]
-		lw $t7, 0($t6)	# t7 = location of lv1Platforms[iteration] on game screen
+		add $t6, $t8, $t5	# t6 is memory address of lv(x)Platforms[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv(x)Platforms[iteration] on game screen
 		
 		# DRAW PLATFORM (+6 units to the right)
 		li $t1, BROWN
@@ -789,12 +1061,12 @@ movePlatformsUD:
 		bnez $t7, drawPlatformsUD
 		
 		# INITIALIZE REGISTERS FOR HANDLING MOVING LOGIC (up-down)
-		li $t4, 8	# t4 = number of total platforms to handle * 4
+		lb $t4, curNumMovePlatformsUD	# t4 = number of total platforms to handle * 4
 		li $t5, 0	# t5 = number of platforms handled * 4
 		
-		la $s0, lv1MovePlatformsUD	# s0 = memory address of array lv1MovePlatformsUD
-		la $s1, lv1MovePlatformsUDProg	# s1 = address of array lv1MovePlatformsUDProg
-		la $s2, lv1MovePlatformsUDState		#s2 = address of array lv1MovePlatformsUDState
+		lw $s0, curMovePlatformsUDAddr	# s0 = memory address of array lv(x)MovePlatformsUD
+		lw $s1, curMovePlatformsUDProgAddr	# s1 = address of array lv(x)MovePlatformsUDProg
+		lw $s2, curMovePlatformsUDStateAddr		#s2 = address of array lv(x)MovePlatformsUDState
 		
 		j movePlatformsUDLoop
 
@@ -804,16 +1076,16 @@ movePlatformsUDLoop:
 		# AVAILABLE REGISTERS: t6, t7, t8
 		
 		# GET STATE OF PLATFORM (0 = lowering, 1 = raising, 2+ = waiting)
-		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsUDState[iteration]
-		lw $a0, 0($t6)	# a0 = STATE of platform lv1MovePlatformsUD[iteration]
+		add $t6, $s2, $t5	# t6 is memory address of lv(x)MovePlatformsUDState[iteration]
+		lw $a0, 0($t6)	# a0 = STATE of platform lv(x)MovePlatformsUD[iteration]
 		
 		#TODO, print state
 		li $v0, 1
 		#syscall
 		
 		# GET PROG OF PLATFORM (0 to 5)
-		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsUDProg[iteration]
-		lw $a1, 0($t6)	# a1 = PROG of platform lv1MovePlatformsUD[iteration]
+		add $t6, $s1, $t5	# t6 is memory address of lv(x)MovePlatformsUDProg[iteration]
+		lw $a1, 0($t6)	# a1 = PROG of platform lv(x)MovePlatformsUD[iteration]
 		
 		beqz $a0, handleLowerPlatform	# if state == 0, handle lowering platform
 		
@@ -826,8 +1098,8 @@ movePlatformsUDLoop:
 		
 		# OTHERWISE, 2 <= STATE < 4 (continue waiting)
 		addi $a0, $a0, 1	# increment state
-		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsUDState[iteration]
-		sw $a0, 0($t6)	# store waiting state back into lv1MovePlatformsUDState[iteration]
+		add $t6, $s2, $t5	# t6 is memory address of lv(x)MovePlatformsUDState[iteration]
+		sw $a0, 0($t6)	# store waiting state back into lv(x)MovePlatformsUDState[iteration]
 		
 		j movePlatformsUDIterEnd	# end of iteration
 
@@ -835,14 +1107,14 @@ handleLowerPlatform:
 		beqz $a1, handleDoneMovingPlatformUD	# if platform prog == 0, platform is done lowering
 		
 		# O/W PLATFORM IS STILL LOWERING
-		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsUDProg[iteration]
+		add $t6, $s1, $t5	# t6 is memory address of lv(x)MovePlatformsUDProg[iteration]
 		
-		add $t7, $s0, $t5	# t7 is the memory address of lv1MovePlatformsUD[iteration]
-		lw $a2, 0($t7)	# a2 is the location of lv1MovePlatformsUD[iteration] on the screen
+		add $t7, $s0, $t5	# t7 is the memory address of lv(x)MovePlatformsUD[iteration]
+		lw $a2, 0($t7)	# a2 is the location of lv(x)MovePlatformsUD[iteration] on the screen
 		jal undrawPlatformUD	# undraw platform at old prog $a1, given platform at $a2
 		
 		addi $a1, $a1, -1		# decrement prog
-		sw $a1, 0($t6)	# store decremented prog back into lv1MovePlatformsUDProg[iteration]
+		sw $a1, 0($t6)	# store decremented prog back into lv(x)MovePlatformsUDProg[iteration]
 		
 		j movePlatformsUDIterEnd	# end of iteration
 		
@@ -851,21 +1123,21 @@ handleRaisePlatform:
 		beq $a1, $t6, handleDoneMovingPlatformUD		# if platform prog == 5, platform is done raising
 		
 		# O/W PLATFORM IS STILL RAISING
-		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsUDProg[iteration]
+		add $t6, $s1, $t5	# t6 is memory address of lv(x)MovePlatformsUDProg[iteration]
 		
-		add $t7, $s0, $t5	# t7 is the memory address of lv1MovePlatformsUD[iteration]
-		lw $a2, 0($t7)	# a2 is the location of lv1MovePlatformsUD[iteration] on the screen
+		add $t7, $s0, $t5	# t7 is the memory address of lv(x)MovePlatformsUD[iteration]
+		lw $a2, 0($t7)	# a2 is the location of lv(x)MovePlatformsUD[iteration] on the screen
 		jal undrawPlatformUD	# undraw platform at old prog $a1, given platform at $a2
 		
 		addi $a1, $a1, 1		# increment prog
-		sw $a1, 0($t6)	# store incremented prog back into lv1MovePlatformsUDProg[iteration]
+		sw $a1, 0($t6)	# store incremented prog back into lv(x)MovePlatformsUDProg[iteration]
 		
 		j movePlatformsUDIterEnd	# end of iteration
 		
 handleDoneMovingPlatformUD:
-		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsUDState[iteration]
+		add $t6, $s2, $t5	# t6 is memory address of lv(x)MovePlatformsUDState[iteration]
 		li $t7, 2	# t7 = waiting state (2)
-		sw $t7, 0($t6)	# store waiting state back into lv1MovePlatformsUDState[iteration]
+		sw $t7, 0($t6)	# store waiting state back into lv(x)MovePlatformsUDState[iteration]
 		
 		j movePlatformsUDIterEnd	# end of iteration
 
@@ -873,15 +1145,15 @@ handleContinuePlatformUD:
 		beqz $a1, startRaising		# if prog == 0, then platform just finished lowering (should start raising)
 		
 		# O/W, PLATFORM SHOULD START LOWERING
-		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsUDState[iteration]
-		sw $zero, 0($t6)		# store lowering state (0) back into lv1MovePlatformsUDState[iteration]
+		add $t6, $s2, $t5	# t6 is memory address of lv(x)MovePlatformsUDState[iteration]
+		sw $zero, 0($t6)		# store lowering state (0) back into lv(x)MovePlatformsUDState[iteration]
 		
 		j movePlatformsUDIterEnd	# end of iteration
 startRaising:
 		# PLATFORM SHOULD START RAISING
-		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsUDState[iteration]
+		add $t6, $s2, $t5	# t6 is memory address of lv(x)MovePlatformsUDState[iteration]
 		li $t7, 1	# t7 = raising state (1)
-		sw $t7, 0($t6)	# store raising state back into lv1MovePlatformsUDState[iteration]
+		sw $t7, 0($t6)	# store raising state back into lv(x)MovePlatformsUDState[iteration]
 		
 		j movePlatformsUDIterEnd	# end of iteration
 
@@ -919,10 +1191,10 @@ undrawPlatformUD:
 
 drawPlatformsUD:
 		# INITIALIZE REGISTERS FOR DRAWING MOVING PLATFORMS (up-down)
-		li $t4, 8	# t4 = number of total platforms to draw * 4
+		lb $t4, curNumMovePlatformsUD	# t4 = number of total UD platforms to draw * 4
 		li $t5, 0	# t5 = number of platforms drawn * 4
-		la $s0, lv1MovePlatformsUD	# s0 = memory address of array lv1MovePlatformsUD
-		la $s1, lv1MovePlatformsUDProg
+		lw $s0, curMovePlatformsUDAddr	# s0 = memory address of array lv(x)MovePlatformsUD
+		lw $s1, curMovePlatformsUDProgAddr
 		
 		j drawPlatformsUDLoop
 		
@@ -932,15 +1204,15 @@ drawPlatformsUDLoop:
 		# AVAILABLE REGISTERS: (t1), t6, t7, t8
 		
 		# GET VERTICAL OFFSET FROM PROG
-		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsUDProg[iteration]
-		lw $t7, 0($t6)	# t7 = vertical offset of platform lv1MovePlatforms[iteration]
+		add $t6, $s1, $t5	# t6 is memory address of lv(x)MovePlatformsUDProg[iteration]
+		lw $t7, 0($t6)	# t7 = vertical offset of platform lv(x)MovePlatforms[iteration]
 		li $t8, 256
 		mult $t7, $t8
 		mflo $t6	# t6 = vertical offset (0-5) * 256
 		
 		# GET NEW PLATFORM LOCATION wrt. OFFSET GIVEN BY PROG
-		add $t7, $s0, $t5	# t7 is memory address of lv1MovePlatformsUD[iteration]
-		lw $t8, 0($t7)	# t8 = location of lv1MovePlatformsUD[iteration] on game screen
+		add $t7, $s0, $t5	# t7 is memory address of lv(x)MovePlatformsUD[iteration]
+		lw $t8, 0($t7)	# t8 = location of lv(x)MovePlatformsUD[iteration] on game screen
 		
 		sub $t8, $t8, $t6		# t8 = location of moving platform - (vertical offset)
 		
@@ -993,12 +1265,12 @@ movePlatformsLR:
 		bnez $t7, drawPlatformsLR
 		
 		# INITIALIZE REGISTERS FOR HANDLING MOVING LOGIC (left-right)
-		li $t4, 4	# t4 = number of total platforms to handle * 4
+		lb $t4, curNumMovePlatformsLR	# t4 = number of total platforms to handle * 4
 		li $t5, 0	# t5 = number of platforms handled * 4
 		
-		la $s0, lv1MovePlatformsLR	# s0 = memory address of array lv1MovePlatformsLR
-		la $s1, lv1MovePlatformsLRProg	# s1 = address of array lv1MovePlatformsLRProg
-		la $s2, lv1MovePlatformsLRState		#s2 = address of array lv1MovePlatformsLRState
+		lw $s0, curMovePlatformsLRAddr	# s0 = memory address of array lv(x)MovePlatformsLR
+		lw $s1, curMovePlatformsLRProgAddr	# s1 = address of array lv(x)MovePlatformsLRProg
+		lw $s2, curMovePlatformsLRStateAddr		#s2 = address of array lv(x)MovePlatformsLRState
 		
 		j movePlatformsLRLoop
 
@@ -1008,12 +1280,12 @@ movePlatformsLRLoop:
 		# AVAILABLE REGISTERS: t6, t7, t8
 		
 		# GET STATE OF PLATFORM (0 = moving left, 1 = moving right, 2+ = waiting)
-		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsLRState[iteration]
-		lw $a0, 0($t6)	# a0 = STATE of platform lv1MovePlatformsLR[iteration]
+		add $t6, $s2, $t5	# t6 is memory address of lv(x)MovePlatformsLRState[iteration]
+		lw $a0, 0($t6)	# a0 = STATE of platform lv(x)MovePlatformsLR[iteration]
 		
 		# GET PROG OF PLATFORM (0 to 7)
-		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsLRProg[iteration]
-		lw $a1, 0($t6)	# a1 = PROG of platform lv1MovePlatformsLR[iteration]
+		add $t6, $s1, $t5	# t6 is memory address of lv(x)MovePlatformsLRProg[iteration]
+		lw $a1, 0($t6)	# a1 = PROG of platform lv(x)MovePlatformsLR[iteration]
 		
 		beqz $a0, handleLeftPlatform	# if state == 0, handle moving platform left
 		
@@ -1026,8 +1298,8 @@ movePlatformsLRLoop:
 		
 		# OTHERWISE, 2 <= STATE < 4 (continue waiting)
 		addi $a0, $a0, 1	# increment state
-		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsLRState[iteration]
-		sw $a0, 0($t6)	# store waiting state back into lv1MovePlatformsLRState[iteration]
+		add $t6, $s2, $t5	# t6 is memory address of lv(x)MovePlatformsLRState[iteration]
+		sw $a0, 0($t6)	# store waiting state back into lv(x)MovePlatformsLRState[iteration]
 		
 		j movePlatformsLRIterEnd	# end of iteration
 
@@ -1035,14 +1307,14 @@ handleLeftPlatform:
 		beqz $a1, handleDoneMovingPlatformLR	# if platform prog == 0, platform is done moving left
 		
 		# O/W PLATFORM IS STILL MOVING LEFT
-		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsLRProg[iteration]
+		add $t6, $s1, $t5	# t6 is memory address of lv(x)MovePlatformsLRProg[iteration]
 		
-		add $t7, $s0, $t5	# t7 is the memory address of lv1MovePlatformsLR[iteration]
-		lw $a2, 0($t7)	# a2 is the location of lv1MovePlatformsLR[iteration] on the screen
+		add $t7, $s0, $t5	# t7 is the memory address of lv(x)MovePlatformsLR[iteration]
+		lw $a2, 0($t7)	# a2 is the location of lv(x)MovePlatformsLR[iteration] on the screen
 		jal undrawPlatformLR	# undraw platform at old prog $a1, given platform at $a2
 		
 		addi $a1, $a1, -1		# decrement prog
-		sw $a1, 0($t6)	# store decremented prog back into lv1MovePlatformsLRProg[iteration]
+		sw $a1, 0($t6)	# store decremented prog back into lv(x)MovePlatformsLRProg[iteration]
 		
 		j movePlatformsLRIterEnd	# end of iteration
 		
@@ -1051,21 +1323,21 @@ handleRightPlatform:
 		beq $a1, $t6, handleDoneMovingPlatformLR		# if platform prog == 7, platform is done moving right
 		
 		# O/W PLATFORM IS STILL MOVING RIGHT
-		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsLRProg[iteration]
+		add $t6, $s1, $t5	# t6 is memory address of lv(x)MovePlatformsLRProg[iteration]
 		
-		add $t7, $s0, $t5	# t7 is the memory address of lv1MovePlatformsLR[iteration]
-		lw $a2, 0($t7)	# a2 is the location of lv1MovePlatformsLR[iteration] on the screen
+		add $t7, $s0, $t5	# t7 is the memory address of lv(x)MovePlatformsLR[iteration]
+		lw $a2, 0($t7)	# a2 is the location of lv(x)MovePlatformsLR[iteration] on the screen
 		jal undrawPlatformLR	# undraw platform at old prog $a1, given platform at $a2
 		
 		addi $a1, $a1, 1		# increment prog
-		sw $a1, 0($t6)	# store incremented prog back into lv1MovePlatformsLRProg[iteration]
+		sw $a1, 0($t6)	# store incremented prog back into lv(x)MovePlatformsLRProg[iteration]
 		
 		j movePlatformsLRIterEnd	# end of iteration
 		
 handleDoneMovingPlatformLR:
-		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsLRState[iteration]
+		add $t6, $s2, $t5	# t6 is memory address of lv(x)MovePlatformsLRState[iteration]
 		li $t7, 2	# t7 = waiting state (2)
-		sw $t7, 0($t6)	# store waiting state back into lv1MovePlatformsLRState[iteration]
+		sw $t7, 0($t6)	# store waiting state back into lv(x)MovePlatformsLRState[iteration]
 		
 		j movePlatformsLRIterEnd	# end of iteration
 
@@ -1073,15 +1345,15 @@ handleContinuePlatformLR:
 		beqz $a1, startMovingRight		# if prog == 0, then platform just finished going left (should start going right)
 		
 		# O/W, PLATFORM SHOULD START GOING LEFT
-		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsLRState[iteration]
-		sw $zero, 0($t6)		# store moving left state (0) back into lv1MovePlatformsLRState[iteration]
+		add $t6, $s2, $t5	# t6 is memory address of lv(x)MovePlatformsLRState[iteration]
+		sw $zero, 0($t6)		# store moving left state (0) back into lv(x)MovePlatformsLRState[iteration]
 		
 		j movePlatformsLRIterEnd	# end of iteration
 startMovingRight:
 		# PLATFORM SHOULD START MOVING RIGHT
-		add $t6, $s2, $t5	# t6 is memory address of lv1MovePlatformsLRState[iteration]
+		add $t6, $s2, $t5	# t6 is memory address of lv(x)MovePlatformsLRState[iteration]
 		li $t7, 1	# t7 = moving right state (1)
-		sw $t7, 0($t6)	# store moving right state back into lv1MovePlatformsLRState[iteration]
+		sw $t7, 0($t6)	# store moving right state back into lv(x)MovePlatformsLRState[iteration]
 		
 		j movePlatformsLRIterEnd	# end of iteration
 
@@ -1119,10 +1391,10 @@ undrawPlatformLR:
 		
 drawPlatformsLR:
 		# INITIALIZE REGISTERS FOR DRAWING MOVING PLATFORMS (left-right)
-		li $t4, 4	# t4 = number of total platforms to draw * 4
+		lb $t4, curNumMovePlatformsLR	# t4 = number of total LR platforms to draw * 4
 		li $t5, 0	# t5 = number of platforms drawn * 4
-		la $s0, lv1MovePlatformsLR	# s0 = memory address of array lv1MovePlatformsLR
-		la $s1, lv1MovePlatformsLRProg
+		lw $s0, curMovePlatformsLRAddr	# s0 = memory address of array lv(x)MovePlatformsLR
+		lw $s1, curMovePlatformsLRProgAddr
 		
 		j drawPlatformsLRLoop
 		
@@ -1132,15 +1404,15 @@ drawPlatformsLRLoop:
 		# AVAILABLE REGISTERS: (t1), t6, t7, t8
 		
 		# GET HORIZONTAL OFFSET FROM PROG
-		add $t6, $s1, $t5	# t6 is memory address of lv1MovePlatformsLRProg[iteration]
-		lw $t7, 0($t6)	# t7 = horizontal offset of platform lv1MovePlatformsLR[iteration]
+		add $t6, $s1, $t5	# t6 is memory address of lv(x)MovePlatformsLRProg[iteration]
+		lw $t7, 0($t6)	# t7 = horizontal offset of platform lv(x)MovePlatformsLR[iteration]
 		li $t8, 4
 		mult $t7, $t8
 		mflo $t6	# t6 = horizontal offset (0-5) * 4
 		
 		# GET NEW PLATFORM LOCATION wrt. OFFSET GIVEN BY PROG
-		add $t7, $s0, $t5	# t7 is memory address of lv1MovePlatformsLR[iteration]
-		lw $t8, 0($t7)	# t8 = location of lv1MovePlatformsLR[iteration] on game screen
+		add $t7, $s0, $t5	# t7 is memory address of lv(x)MovePlatformsLR[iteration]
+		lw $t8, 0($t7)	# t8 = location of lv(x)MovePlatformsLR[iteration] on game screen
 		
 		add $t8, $t8, $t6		# t8 = location of moving platform + (horizontal unit offset)
 		
