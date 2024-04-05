@@ -47,7 +47,12 @@
 .eqv LIGHTBLUE 0xC9FBFF
 .eqv DARKORANGE 0xD85F00
 
+.eqv RED 0xFF0000
+.eqv DARKGRAY 0x535353
+
 .data
+playerHealth:	.byte		2	# TODO
+
 # locations of static platforms
 lv1Platforms:	.word	0x1000BB28, 0x1000B088	# TODO
 
@@ -77,6 +82,10 @@ hourglassInEffect:	.byte		0
 hourglassStartTime:	.word	0
 
 platformMoveFrequency:	.byte		6
+
+# locations of hearts pickups (adds health if player needs it)
+lv1Hearts:	.word	0x1000B694
+lv1HeartsAlive:	.word	1
 
 currentLv:		.word	1 # TODO
 
@@ -269,7 +278,7 @@ setVelocityZero:
 		j undrawPlayer
 
 #################################################
-# DRAWING (undraw player, draw background, pickups, platforms, moving platforms, draw player)
+# DRAWING (undraw player, draw background, pickups, platforms, moving platforms, draw player, draw hearts UI)
 # AND HANDLING COLLISIONS
 #################################################
 
@@ -501,7 +510,7 @@ disableHourglassEffect:
 		j drawHourglassesLoop
 
 drawHourglassesLoop:
-		bge $t5, $t4, drawHearts	# start drawing hearts next if loop finishes
+		bge $t5, $t4, drawHeartPickups	# start drawing heart pickups next if loop finishes
 		
 		# CHECK IF HOURGLASS IS STILL ALIVE (not picked up yet)
 		add $t6, $s1, $t5	# t6 is memory address of lv1HourglassesAlive[iteration]
@@ -630,8 +639,110 @@ undrawHourglassOnScreen:
 		
 		jr $ra
 
-drawHearts:
-		j drawPlatforms	# TODO
+drawHeartPickups:
+		# INITIALIZE REGISTERS FOR DRAWING HEARTS LOOP
+		li $t4, 4	# t4 = number of total heart pickups to draw * 4
+		li $t5, 0	# t5 = number of heart pickups drawn * 4
+		la $s0, lv1Hearts	# s0 = memory address of array lv1Hearts
+		la $s1, lv1HeartsAlive	# s1 = memory address of array lv1HeartsAlive
+		
+		j drawHeartsLoop
+
+drawHeartsLoop:
+		bge $t5, $t4, drawPlatforms		# start drawing platforms next if loop finishes
+		
+		# CHECK IF HEART IS STILL ALIVE (not picked up yet)
+		add $t6, $s1, $t5	# t6 is memory address of lv1HeartsAlive[iteration]
+		lw $t7, 0($t6)	# t7 = whether or not heart is still alive
+		beqz $t7, drawHeartsIterEnd	# if heart is not alive, skip checking player dist and drawing
+		
+		# CHECK IF PLAYER DOESN'T NEED HEART (player health == 3)
+		li $t7, 3
+		lb $t8, playerHealth
+		beq $t8, $t7, drawHeartOnScreen		# if player doesn't need heart, draw it and ignore checking
+
+		# CHECK IF PLAYER IS NEAR HEART
+		add $t6, $s0, $t5	# t6 is memory address of lv1Hearts[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv1Hearts[iteration] on game screen
+		
+		li $t8, 16
+		add $t8, $t8, $t0
+		bge $t8, $t7, checkPlayerTouchHeart		# if player loc + 16 >= heart loc, 
+										# player may be touching heart
+		
+		# CHECK ONE ROW ABOVE HEART LOC (detect one more row)
+		addi $t7, $t7, -256
+		bge $t8, $t7, checkPlayerTouchHeart		# if player loc + 16 >= heart loc + one row, 
+										# player may be touching heart
+		
+		# ELSE, DRAW HEART
+		j drawHeartOnScreen
+		
+checkPlayerTouchHeart:
+		# Assume $t7 set to location of lv1Hearts[iteration] from previous branch
+		li $t8, 16
+		add $t8, $t8, $t7
+		bge $t8, $t0, pickUpHeart		# if heart loc + 16 >= player loc AND
+								# player loc + 16 >= heart loc, player IS touching heart
+		
+		# IF PLAYER ISN'T TOUCHING HEART, DRAW
+		j drawHeartOnScreen
+		
+pickUpHeart:
+		# SET HEARTALIVE[iteration] TO 0
+		add $t6, $s1, $t5	# t6 is memory address of lv1HeartsAlive[iteration]
+		sw $zero, 0($t6)	
+		
+		# INCREMENT PLAYER HEALTH
+		lb $t8, playerHealth
+		addi $t8, $t8, 1
+		sb $t8, playerHealth
+		
+		# UNDRAW HEART
+		jal undrawHeartOnScreen
+		
+		j drawHeartsIterEnd		# end of iteration (no need to draw heart, since it's been picked up)
+
+drawHeartOnScreen:
+		add $t6, $s0, $t5	# t6 is memory address of lv1Hearts[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv1Hearts[iteration] on game screen
+		
+		# heart
+		li $t1, RED
+		sw $t1, 4($t7)
+		sw $t1, -256($t7)
+		sw $t1, -252($t7)
+		sw $t1, -248($t7)
+		sw $t1, -512($t7)
+		sw $t1, -504($t7)
+		
+		j drawHeartsIterEnd
+				
+drawHeartsIterEnd:
+		addi $t5, $t5, 4	# increment # hearts handled * 4
+		j drawHeartsLoop
+		
+# PREREQ: $s0 is the memory address of lv1Hearts[iteration]
+#		  $t5 is the iteration count * 4
+undrawHeartOnScreen:
+		li $v0, 1	# TODO
+		li $a0, 99999
+		syscall
+
+		add $t6, $s0, $t5	# t6 is memory address of lv1Hearts[iteration]
+		lw $t7, 0($t6)	# t7 = location of lv1Hearts[iteration] on game screen
+		
+		li $t1, 0x0	# black
+		
+		# heart
+		sw $t1, 4($t7)
+		sw $t1, -256($t7)
+		sw $t1, -252($t7)
+		sw $t1, -248($t7)
+		sw $t1, -512($t7)
+		sw $t1, -504($t7)
+		
+		jr $ra
 
 # PREREQ: none of the platforms are 6 or more units from the rightmost part of the screen
 # 		  nor 2 or more units from the bottom of the screen
@@ -1100,7 +1211,62 @@ drawPlayer:
 		sw $t1, -1528($t0)
 		sw $t1, -1784($t0)
 		
-		j SLEEP
+		j drawHeartsUI	# draw hearts UI after
+
+drawHeartsUI:
+		# INITIALIZE REGISTERS TO DRAW HEARTS
+		lb $t4, playerHealth	# t4 = player health (0 to 3)
+		li $t5, 0	# number of hearts drawn
+		
+		# SET T6 TO FIRST HEART DRAWING LOCATION
+		li $t6, BASE_ADDRESS
+		addi $t6, $t6, 520	# first heart UI location = base address + 2 units down + 2 units right
+		
+		j drawHeartsUILoop
+
+drawHeartsUILoop:
+		li $t7, 3
+		bge $t5, $t7, SLEEP	# if 3 UI hearts have been drawn, we're done drawing everything
+		bge $t5, $t4, drawEmptyHeartUI	# if number of hearts drawn >= player health, draw empty heart
+		
+		# DRAW HEART UI
+		li $t1, RED
+		sw $t1, 4($t6)
+		sw $t1, 12($t6)
+		sw $t1, 256($t6)
+		sw $t1, 260($t6)
+		sw $t1, 264($t6)
+		sw $t1, 272($t6)
+		sw $t1, 516($t6)
+		sw $t1, 520($t6)
+		sw $t1, 524($t6)
+		sw $t1, 776($t6)
+		li $t1, WHITE
+		sw $t1, 268($t6)
+		
+		j drawHeartsUIIterEnd
+
+drawEmptyHeartUI:
+		# DRAW EMPTY HEART UI
+		li $t1, DARKGRAY
+		sw $t1, 4($t6)
+		sw $t1, 12($t6)
+		sw $t1, 256($t6)
+		sw $t1, 260($t6)
+		sw $t1, 264($t6)
+		sw $t1, 268($t6)
+		sw $t1, 272($t6)
+		sw $t1, 516($t6)
+		sw $t1, 520($t6)
+		sw $t1, 524($t6)
+		sw $t1, 776($t6)
+		
+		j drawHeartsUIIterEnd
+		
+drawHeartsUIIterEnd:
+		addi $t6, $t6, 24		# move next heart UI location 7 units to the right
+		addi $t5, $t5, 1	# increment UI hearts drawn
+		j drawHeartsUILoop
 
 # RETURNS 1 IF PLAYER IS ON A PLATFORM OR ON THE GROUND, 0 O/W
 # PREREQ: $t3 is a valid new player location within the screen
