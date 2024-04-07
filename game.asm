@@ -225,6 +225,23 @@ main:	# IMPORTANT TEMP REGISTERS: t0 (PLAYER LOCATION), t1 (COLOR),
 		lb $t6, lv1NumHearts
 		sb $t6, curNumHearts
 		
+		# RESET HEARTS ON LV1 AND LV2
+		li $t4, 1
+		sw $t4, lv1HeartsAlive
+		sw $t4, lv2HeartsAlive
+		
+		# RESET ALL EFFECTS
+		sb $zero, featherInEffect
+		sb $zero, hourglassInEffect
+		
+		# RESET PLAYER HEALTH
+		li $t5, 3
+		sb $t5, playerHealth
+		
+		# RESET CURRENT LV COUNTER
+		li $t6, 1
+		sb $t6, currentLv
+		
 		j undrawScreen
 
 beatLevel:
@@ -582,7 +599,7 @@ keypressHappened:
 		beq $t7, 0x64, respondToRight	# ASCII code of 'd' is 0x64
 		beq $t7, 0x77, respondToUp	# ASCII code of 'w' is 0x77
 		beq $t7, 0x71, QUIT			# ASCII code of 'q' is 0x71
-		# TODO: IMPLEMENT RESET
+		beq $t7, 0x72, main			# ASCII code of 'r' is 0x72
 		
 		j updateLocation
 		
@@ -959,7 +976,7 @@ processHourglassEffect:
 		bgt $t9, $t6, disableHourglassEffect	# if game tick > hourglass effect start time + 250, 
 									# hourglass effect is finished
 									
-		# SET PLATFORM MOVE FREQUENCY TO 18 (triple of normal freq)
+		# SET PLATFORM MOVE FREQUENCY TO 12 (triple of normal freq)
 		li $t7, 12
 		sb $t7, platformMoveFrequency
 		
