@@ -16,15 +16,20 @@
 # (See the assignment handout for descriptions of the milestones)
 # - Milestone 1,2,3,4 (ALL)
 #
-# Which approved features have been implemented for milestone 3? TODO
+# Which approved features have been implemented for milestone 4?
 # (See the assignment handout for the list of additional features)
-# 1. (fill in the feature, if any)
-# 2. (fill in the feature, if any)
-# 3. (fill in the feature, if any)
-# ... (add more if necessary)
+# 1. MOVING PLATFORMS (2 points)
+# 	- multiple platforms that move left-to-right and up-and-down
+# 2. DIFFERENT LEVELS (2 points)
+#	- 3 different levels with ramping difficulty
+#	- player finishes level when they jump and reach the top
+# 3. PICKUP EFFECTS (2 points)
+#	- feather: jump boost for the next jump only
+#	- hourglass: slow down time (so moving platforms are easier to maneuver)
+#	- heart: to restore player health (out of 3)
 #
-# Link to video demonstration for final submission: TODO
-# - (insert YouTube / MyMedia / other URL here). Make sure we can view it!
+# Link to video demonstration for final submission:
+# - (insert YouTube / MyMedia / other URL here). Make sure we can view it!	TODO!!
 #
 # Are you OK with us sharing the video with people outside course staff?
 # - yes, and please share this project github link as well!
