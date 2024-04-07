@@ -56,63 +56,63 @@ playerHealth:	.byte		3
 # locations of static platforms
 lv1Platforms:	.word	0x1000B9B0, 0x1000B294, 0x1000AF5C, 0x1000B23C, 0x1000A75C, 0x10008DC4
 lv1NumPlatforms:	.byte		24	# num platforms * 4
-lv2Platforms:	.word	0x1000BBC4
-lv2NumPlatforms:	.byte		4	# num platforms * 4
-lv3Platforms:	.word	0x1000B9B0
-lv3NumPlatforms:	.byte		4	# num platforms * 4
+lv2Platforms:	.word	0x1000BBC4, 0x1000B614, 0x1000A614, 0x1000A550, 0x1000A780, 0x10008DC4
+lv2NumPlatforms:	.byte		24	# num platforms * 4
+lv3Platforms:	.word	0x1000BBC4, 0x1000BBBC, 0x1000B870, 0x1000A634, 0x1000A644, 0x1000A648, 0x1000954C, 0x1000953C, 0x1000952C, 0x1000951C
+lv3NumPlatforms:	.byte		40	# num platforms * 4
 curPlatformsAddr:	.word	0x0
 curNumPlatforms:	.byte		0	# CURRENT LV'S number of static platforms
 
 # locations of moving platforms (up-down)
 lv1MovePlatformsUD:	.word	0x1000AA14, 0x1000A07C, 0x10009BA4
 lv2MovePlatformsUD:	.word	0x1000AA14
-lv3MovePlatformsUD:	.word	0x1000AA14
+lv3MovePlatformsUD:	.word	0x1000BD80, 0x1000B00C, 0x1000A2C4
 curMovePlatformsUDAddr:	.word	0
 # move progress of respective platform (0 to 5)
 lv1MovePlatformsUDProg:	.word		0, 5, 0
 lv2MovePlatformsUDProg:	.word		0
-lv3MovePlatformsUDProg:	.word		0
+lv3MovePlatformsUDProg:	.word		3, 5, 0
 curMovePlatformsUDProgAddr:	.word	0
 # 0 = lowering, 1 = raising, 2+ = waiting
 lv1MovePlatformsUDState:	.word		0, 1, 0
 lv2MovePlatformsUDState:	.word		0
-lv3MovePlatformsUDState:	.word		0
+lv3MovePlatformsUDState:	.word		0, 1, 0
 curMovePlatformsUDStateAddr:	.word	0
 lv1NumMovePlatformsUD:	.byte		12	# num platforms UD * 4
 lv2NumMovePlatformsUD:	.byte		0	# num platforms UD * 4
-lv3NumMovePlatformsUD:	.byte		0	# num platforms UD * 4
+lv3NumMovePlatformsUD:	.byte		12	# num platforms UD * 4
 curNumMovePlatformsUD:	.byte		0	# CURRENT LV'S number of up-down platforms
 
 # locations of moving platforms (left-right)
-lv1MovePlatformsLR:	.word	0x1000B788	# TODO
-lv2MovePlatformsLR:	.word	0x1000B788	# TODO
-lv3MovePlatformsLR:	.word	0x1000B788	# TODO
+lv1MovePlatformsLR:	.word	0
+lv2MovePlatformsLR:	.word	0x1000BB7C, 0x1000BB30, 0x10009BA8
+lv3MovePlatformsLR:	.word	0x1000BD2C, 0x1000A678, 0x10009580
 curMovePlatformsLRAddr:	.word	0
 # move progress of respective platform (0 to 7)
 lv1MovePlatformsLRProg:	.word		0
-lv2MovePlatformsLRProg:	.word		0
-lv3MovePlatformsLRProg:	.word		0
+lv2MovePlatformsLRProg:	.word		0, 7, 4
+lv3MovePlatformsLRProg:	.word		3, 0, 6
 curMovePlatformsLRProgAddr:	.word	0
 # 0 = moving left, 1 = moving right, 2+ = waiting
 lv1MovePlatformsLRState:	.word		0
-lv2MovePlatformsLRState:	.word		0
-lv3MovePlatformsLRState:	.word		0
+lv2MovePlatformsLRState:	.word		0, 1, 0
+lv3MovePlatformsLRState:	.word		0, 0, 1
 curMovePlatformsLRStateAddr:	.word	0
 lv1NumMovePlatformsLR:	.byte		0	# num platforms LR * 4
-lv2NumMovePlatformsLR:	.byte		0	# num platforms LR * 4
-lv3NumMovePlatformsLR:	.byte		0	# num platforms LR * 4
+lv2NumMovePlatformsLR:	.byte		12	# num platforms LR * 4
+lv3NumMovePlatformsLR:	.byte		12	# num platforms LR * 4
 curNumMovePlatformsLR:	.byte		0	# CURRENT LV'S number of left-right platforms
 
 # locations of feather pickups (increases jumping power)
-lv1Feathers:	.word	0x1000A128
-lv1FeathersAlive:	.word	1
+lv1Feathers:	.word	0
+lv1FeathersAlive:	.word	0
 lv1NumFeathers:	.byte		0	# num feathers * 4
-lv2Feathers:	.word	0x1000A128
-lv2FeathersAlive:	.word	1
-lv2NumFeathers:	.byte		0	# num feathers * 4
-lv3Feathers:	.word	0x1000A128
-lv3FeathersAlive:	.word	1
-lv3NumFeathers:	.byte		0	# num feathers * 4
+lv2Feathers:	.word	0x1000B318, 0x1000A584, 0x10009AC8
+lv2FeathersAlive:	.word	1, 1, 1
+lv2NumFeathers:	.byte		12	# num feathers * 4
+lv3Feathers:	.word	0x1000B774, 0x10009424
+lv3FeathersAlive:	.word	1, 1
+lv3NumFeathers:	.byte		8	# num feathers * 4
 
 curFeathersAddr:	.word	0
 curFeathersAliveAddr:		.word	0
@@ -121,15 +121,15 @@ curNumFeathers:	.byte		0
 featherInEffect:	.byte		0
 
 # locations of hourglass pickups (slow down time)
-lv1Hourglasses:	.word	0x1000A888
-lv1HourglassesAlive:	.word	1
+lv1Hourglasses:	.word	0
+lv1HourglassesAlive:	.word	0
 lv1NumHourglasses:	.byte		0	# num hourglasses * 4
-lv2Hourglasses:	.word	0x1000A888
+lv2Hourglasses:	.word	0x1000B5AC
 lv2HourglassesAlive:	.word	1
-lv2NumHourglasses:	.byte		0	# num hourglasses * 4
-lv3Hourglasses:	.word	0x1000A888
+lv2NumHourglasses:	.byte		4	# num hourglasses * 4
+lv3Hourglasses:	.word	0x1000A54C
 lv3HourglassesAlive:	.word	1
-lv3NumHourglasses:	.byte		0	# num hourglasses * 4
+lv3NumHourglasses:	.byte		4	# num hourglasses * 4
 
 curHourglassesAddr:	.word	0
 curHourglassesAliveAddr:		.word	0
@@ -140,15 +140,15 @@ hourglassStartTime:	.word	0
 platformMoveFrequency:	.byte		4
 
 # locations of hearts pickups (adds health if player needs it)
-lv1Hearts:	.word	0x1000A318
+lv1Hearts:	.word	0x1000A418
 lv1HeartsAlive:	.word	1
 lv1NumHearts:	.byte		4	# num heart pickups * 4
-lv2Hearts:	.word	0x1000A318
+lv2Hearts:	.word	0x1000A018
 lv2HeartsAlive:	.word	1
 lv2NumHearts:	.byte		4	# num heart pickups * 4
-lv3Hearts:	.word	0x1000A318
-lv3HeartsAlive:	.word	1
-lv3NumHearts:	.byte		4	# num heart pickups * 4
+lv3Hearts:	.word	0
+lv3HeartsAlive:	.word	0
+lv3NumHearts:	.byte		0	# num heart pickups * 4
 
 curHeartsAddr:	.word	0
 curHeartsAliveAddr:		.word	0
@@ -225,7 +225,7 @@ main:	# IMPORTANT TEMP REGISTERS: t0 (PLAYER LOCATION), t1 (COLOR),
 		lb $t6, lv1NumHearts
 		sb $t6, curNumHearts
 		
-		j undrawPlayer
+		j undrawScreen
 
 beatLevel:
 		# GET LEVEL
@@ -242,7 +242,6 @@ beatLevel:
 		li $t0, 0x1000BEC8	# update position of player to bottom of screen + 1 row (since level restarted)
 		move $t3, $t0	# update temp player pos to match t0
 		li $t2, 12	# update velocity to be "jumping" initially
-		li $t9, 0	# initialize game tick to 0
 		
 		beq $t4, $t5, beatSecondLevel	# if cur level + 1 = 3, we just beat second level
 		
@@ -297,7 +296,17 @@ beatLevel:
 		lb $t6, lv2NumHearts
 		sb $t6, curNumHearts
 		
-		j undrawScreen	# undraw screen to prepare for drawing next level
+		# RESET LV2's PICKUPS (except hearts)
+		
+		# INITIALIZE REGISTERS FOR LOOPING THROUGH LV2's PICKUPS
+		lb $t4, lv2NumFeathers	# t4 = number of total feathers to reset
+		li $t5, 0	# t5 = number of feathers reset * 4
+		lb $t6, lv2NumHourglasses	# t6 = number of total hourglasses to reset
+		li $t7, 0	# t7 = number of hourglasses reset * 4
+		la $s0, lv2FeathersAlive	# s0 = memory address of array lv2FeathersAlive
+		la $s1, lv2HourglassesAlive	# s1 = memory address of array lv2HourglassesAlive
+		
+		j resetFeathersLoop	# start resetting feather pickups
 		
 beatSecondLevel:
 		# static platforms
@@ -350,7 +359,39 @@ beatSecondLevel:
 		lb $t6, lv3NumHearts
 		sb $t6, curNumHearts
 		
-		j undrawScreen	# undraw screen to prepare for drawing next level
+		# INITIALIZE REGISTERS FOR LOOPING THROUGH LV3's PICKUPS
+		lb $t4, lv3NumFeathers	# t4 = number of total feathers to reset
+		li $t5, 0	# t5 = number of feathers reset * 4
+		lb $t6, lv3NumHourglasses	# t6 = number of total hourglasses to reset
+		li $t7, 0	# t7 = number of hourglasses reset * 4
+		la $s0, lv3FeathersAlive	# s0 = memory address of array lv3FeathersAlive
+		la $s1, lv3HourglassesAlive	# s1 = memory address of array lv3HourglassesAlive
+		
+		j resetFeathersLoop	# start resetting feather pickups
+		
+resetFeathersLoop:
+		# Assume t4 = num feathers to reset, t5 = 0 at beginning of loop, s0 = address of feathers alive array
+		bge $t5, $t4, resetHourglassesLoop	# if done resetting feathers, reset hourglasses
+		
+		add $t1, $t5, $s0	# t5 = address of feathersAlive[iteration]
+		li $t8, 1
+		sw $t8, 0($t1)	# feathersAlive[iteration] = 1
+		
+		addi $t5, $t5, 4	# iteration * 4
+		j resetFeathersLoop
+		
+resetHourglassesLoop:
+		# Assume t6 = num hourglasses to reset, t7 = 0 at beginning of loop, 
+		# s1 = address of hourglasses alive array
+		bge $t7, $t6, undrawScreen		# if done resetting pickups, undraw screen to prepare for
+								# drawing of next level
+								
+		add $t1, $t7, $s1	# t5 = address of hourglassesAlive[iteration]
+		li $t8, 1
+		sw $t8, 0($t1)	# hourglassesAlive[iteration] = 1
+		
+		addi $t7, $t7, 4	# iteration * 4
+		j resetHourglassesLoop
 		
 undrawScreen:
 		# INITIALIZE REGISTERS TO PREPARE FOR UNDRAW SCREEN LOOP
@@ -371,8 +412,147 @@ undrawScreenLoop:
 winGame:	#TODO
 		j QUIT
 		
-loseLevel:	#TODO
-		j QUIT
+loseLevel:
+		# IF PLAYER IS STILL ON FIRST LEVEL, HITTING GROUND DOES NOT DO ANYTHING
+		lb $t4, currentLv
+		li $t5, 1
+		beq $t4, $t5, undrawPlayer
+		
+		# ELSE, DECREMENT CURRENTLV
+		addi $t4, $t4, -1
+		sb $t4, currentLv
+		
+		# SET PLAYER LOCATION TO TOP OF SCREEN (to simulate falling down a level)
+		addi $t0, $t0, -13824	# new player loc = old player loc + 13824 units (54 rows)
+		move $t3, $t0	# update temp player pos to match t0
+		
+		# DECREMENT HEARTS IF POSSIBLE
+		lb $t6, playerHealth
+		addi $t6, $t6, -1
+		sb $t6, playerHealth
+		beqz $t6, loseGame	# if new player health after decrement == 0, player lost
+		
+		lb $t4, currentLv
+		li $t7, 2
+		beq $t4, $t7, lostThirdLevel		# if decremented level == 2, player just lost third level
+		
+		# OTHERWISE, PLAYER JUST LOST SECOND LEVEL
+		
+		# UPDATE CURRENT LV'S ADDRESSES AND VALUES (1)
+		# static platforms
+		la $t4, lv1Platforms
+		sw $t4, curPlatformsAddr
+		lb $t5, lv1NumPlatforms
+		sb $t5, curNumPlatforms
+		
+		# UD platforms
+		la $t4, lv1MovePlatformsUD
+		sw $t4, curMovePlatformsUDAddr
+		la $t5, lv1MovePlatformsUDProg
+		sw $t5, curMovePlatformsUDProgAddr
+		la $t6, lv1MovePlatformsUDState
+		sw $t6, curMovePlatformsUDStateAddr
+		lb $t7, lv1NumMovePlatformsUD
+		sb $t7, curNumMovePlatformsUD
+		
+		# LR platforms
+		la $t4, lv1MovePlatformsLR
+		sw $t4, curMovePlatformsLRAddr
+		la $t5, lv1MovePlatformsLRProg
+		sw $t5, curMovePlatformsLRProgAddr
+		la $t6, lv1MovePlatformsLRState
+		sw $t6, curMovePlatformsLRStateAddr
+		lb $t7, lv1NumMovePlatformsLR
+		sb $t7, curNumMovePlatformsLR
+		
+		# feathers
+		la $t4, lv1Feathers
+		sw $t4, curFeathersAddr
+		la $t5, lv1FeathersAlive
+		sw $t5, curFeathersAliveAddr
+		lb $t6, lv1NumFeathers
+		sb $t6, curNumFeathers
+		
+		# hourglasses
+		la $t4, lv1Hourglasses
+		sw $t4, curHourglassesAddr
+		la $t5, lv1HourglassesAlive
+		sw $t5, curHourglassesAliveAddr
+		lb $t6, lv1NumHourglasses
+		sb $t6, curNumHourglasses
+		
+		# hearts
+		la $t4, lv1Hearts
+		sw $t4, curHeartsAddr
+		la $t5, lv1HeartsAlive
+		sw $t5, curHeartsAliveAddr
+		lb $t6, lv1NumHearts
+		sb $t6, curNumHearts
+		
+		j undrawScreen
+lostThirdLevel:
+		# UPDATE CURRENT LV'S ADDRESSES AND VALUES (2)
+		# static platforms
+		la $t4, lv2Platforms
+		sw $t4, curPlatformsAddr
+		lb $t5, lv2NumPlatforms
+		sb $t5, curNumPlatforms
+		
+		# UD platforms
+		la $t4, lv2MovePlatformsUD
+		sw $t4, curMovePlatformsUDAddr
+		la $t5, lv2MovePlatformsUDProg
+		sw $t5, curMovePlatformsUDProgAddr
+		la $t6, lv2MovePlatformsUDState
+		sw $t6, curMovePlatformsUDStateAddr
+		lb $t7, lv2NumMovePlatformsUD
+		sb $t7, curNumMovePlatformsUD
+		
+		# LR platforms
+		la $t4, lv2MovePlatformsLR
+		sw $t4, curMovePlatformsLRAddr
+		la $t5, lv2MovePlatformsLRProg
+		sw $t5, curMovePlatformsLRProgAddr
+		la $t6, lv2MovePlatformsLRState
+		sw $t6, curMovePlatformsLRStateAddr
+		lb $t7, lv2NumMovePlatformsLR
+		sb $t7, curNumMovePlatformsLR
+		
+		# feathers
+		la $t4, lv2Feathers
+		sw $t4, curFeathersAddr
+		la $t5, lv2FeathersAlive
+		sw $t5, curFeathersAliveAddr
+		lb $t6, lv2NumFeathers
+		sb $t6, curNumFeathers
+		
+		# hourglasses
+		la $t4, lv2Hourglasses
+		sw $t4, curHourglassesAddr
+		la $t5, lv2HourglassesAlive
+		sw $t5, curHourglassesAliveAddr
+		lb $t6, lv2NumHourglasses
+		sb $t6, curNumHourglasses
+		
+		# hearts
+		la $t4, lv2Hearts
+		sw $t4, curHeartsAddr
+		la $t5, lv2HeartsAlive
+		sw $t5, curHeartsAliveAddr
+		lb $t6, lv2NumHearts
+		sb $t6, curNumHearts
+		
+		# RESET LV2's PICKUPS (except hearts)
+		
+		# INITIALIZE REGISTERS FOR LOOPING THROUGH LV2's PICKUPS
+		lb $t4, lv2NumFeathers	# t4 = number of total feathers to reset
+		li $t5, 0	# t5 = number of feathers reset * 4
+		lb $t6, lv2NumHourglasses	# t6 = number of total hourglasses to reset
+		li $t7, 0	# t7 = number of hourglasses reset * 4
+		la $s0, lv2FeathersAlive	# s0 = memory address of array lv2FeathersAlive
+		la $s1, lv2HourglassesAlive	# s1 = memory address of array lv2HourglassesAlive
+		
+		j resetFeathersLoop	# start resetting feather pickups
 
 loseGame:	#TODO
 		j QUIT
@@ -513,7 +693,7 @@ decreaseHeight:
 		# CHECK IF PLAYER IS GROUNDED
 		jal isGrounded
 		li $t4, 1
-		beq $v0, $t4, setVelocityZero
+		beq $v0, $t4, checkIfPlayerLost
 		
 		li $t4, -8
 		ble $t2, $t4, decreaseHeightByTwo	# if velocity <= -8, decrease height by 2 instead of 1
@@ -546,6 +726,15 @@ decreaseHeightByTwo:
 adjustDecreaseByTwoAfterPlatform:
 		addi $t3, $t3, -256	# increase height by 1 since we can't decrease by 2 (new player loc is a platform)
 		
+		j setVelocityZero
+		
+checkIfPlayerLost:
+		# CHECK IF PLAYER LOCATION IS ON THE LAST ROW (bottom of screen)
+		li $t4, 16128
+		addi $t5, $t4, BASE_ADDRESS
+		bge $t0, $t5, loseLevel	# if t0 >= BASE_ADDRESS + 16128, player is on bottom of screen,
+							# hence, player lost level
+							
 		j setVelocityZero
 
 setVelocityZero:
@@ -1435,8 +1624,12 @@ drawPlatformsLRLoop:
 		j drawPlatformsLRLoop
 
 drawPlayer:
-		# DRAW AVATAR (width 5 x height 9)
+		# IF HOURGLASS IN EFFECT, DRAW PLAYER GRAYSCALE
+		lb $t4, hourglassInEffect
+		li $t5, 1
+		beq $t4, $t5, drawPlayerGrayscale
 		
+		# DRAW AVATAR (width 5 x height 9)
 		li $t1, 0xff4a60 # dark pink
 		sw $t1, -260($t0)	# dress outline and lined pattern
 		sw $t1, -256($t0)
@@ -1464,6 +1657,16 @@ drawPlayer:
 		sw $t1, -1276($t0)
 		sw $t1, -1272($t0)
 		
+		li $t1, 0xf8c87b	# face
+		sw $t1, -1532($t0)
+		sw $t1, -1528($t0)
+		sw $t1, -1784($t0)
+		
+		# IF FEATHER IN EFFECT, DRAW PLAYER HAIR WHITE
+		lb $t4, featherInEffect
+		li $t5, 1
+		beq $t4, $t5, drawPlayerHairWhite
+		
 		li $t1, 0xf8f37b	# golden yellow
 		sw $t1, -1284($t0)	# hair
 		sw $t1, -1540($t0)
@@ -1477,12 +1680,72 @@ drawPlayer:
 		sw $t1, -2040($t0)
 		sw $t1, -2036($t0)
 		
-		li $t1, 0xf8c87b	# face
-		sw $t1, -1532($t0)
+		j drawHeartsUI	# draw hearts UI after
+		
+drawPlayerGrayscale:
+		# DRAW GRAYSCALE AVATAR (width 5 x height 9)
+		li $t1, 0x6a6a6a # dark gray
+		sw $t1, -260($t0)	# dress outline and lined pattern
+		sw $t1, -256($t0)
+		sw $t1, -252($t0)
+		sw $t1, -248($t0)
+		sw $t1, -244($t0)
+		sw $t1, -500($t0)
+		sw $t1, -1024($t0)
+		sw $t1, -1020($t0)
+		sw $t1, -1016($t0)
+		
+		li $t1, WHITE
+		sw $t1, 0($t0)	# shoes
+		sw $t1, 8($t0)
+		
+		li $t1, 0x959595	# light gray
+		sw $t1, -512($t0)	# dress
+		sw $t1, -508($t0)
+		sw $t1, -504($t0)
+		sw $t1, -764($t0)
+		sw $t1, -760($t0)
+		sw $t1, -1028($t0)
+		sw $t1, -1012($t0)
+		sw $t1, -1280($t0)
+		sw $t1, -1276($t0)
+		sw $t1, -1272($t0)
+		
+		li $t1, WHITE
+		sw $t1, -1284($t0)	# hair
+		sw $t1, -1540($t0)
+		sw $t1, -1536($t0)
+		sw $t1, -1524($t0)
+		sw $t1, -1792($t0)
+		sw $t1, -1788($t0)
+		sw $t1, -1780($t0)
+		sw $t1, -2048($t0)
+		sw $t1, -2044($t0)
+		sw $t1, -2040($t0)
+		sw $t1, -2036($t0)
+		
+		li $t1, 0xd0d0d0
+		sw $t1, -1532($t0)	# face
 		sw $t1, -1528($t0)
 		sw $t1, -1784($t0)
 		
 		j drawHeartsUI	# draw hearts UI after
+		
+drawPlayerHairWhite:
+		li $t1, WHITE
+		sw $t1, -1284($t0)	# hair
+		sw $t1, -1540($t0)
+		sw $t1, -1536($t0)
+		sw $t1, -1524($t0)
+		sw $t1, -1792($t0)
+		sw $t1, -1788($t0)
+		sw $t1, -1780($t0)
+		sw $t1, -2048($t0)
+		sw $t1, -2044($t0)
+		sw $t1, -2040($t0)
+		sw $t1, -2036($t0)
+		
+		j drawHeartsUI
 
 drawHeartsUI:
 		# INITIALIZE REGISTERS TO DRAW HEARTS
@@ -1497,7 +1760,7 @@ drawHeartsUI:
 
 drawHeartsUILoop:
 		li $t7, 3
-		bge $t5, $t7, SLEEP	# if 3 UI hearts have been drawn, we're done drawing everything
+		bge $t5, $t7, drawLevelNumber	# if 3 UI hearts have been drawn, draw level # UI
 		bge $t5, $t4, drawEmptyHeartUI	# if number of hearts drawn >= player health, draw empty heart
 		
 		# DRAW HEART UI
@@ -1538,6 +1801,59 @@ drawHeartsUIIterEnd:
 		addi $t6, $t6, 24		# move next heart UI location 7 units to the right
 		addi $t5, $t5, 1	# increment UI hearts drawn
 		j drawHeartsUILoop
+		
+drawLevelNumber:
+		# DRAW LEVEL NUMBER (1, 2, 3) IN TOP RIGHT CORNER
+		li $t4, BASE_ADDRESS
+		addi $t4, $t4, 756
+		li $t1, WHITE
+		
+		lb $t5, currentLv		# t5 = current level (1-3)
+		li $t6, 3
+		beq $t5, $t6, drawLevel3Ind
+		
+		li $t6, 2
+		beq $t5, $t6, drawLevel2Ind
+		
+		# OTHERWISE, DRAW LEVEL 1 INDICATOR
+		sw $t1, -4($t4)
+		sw $t1, 252($t4)
+		sw $t1, 248($t4)
+		sw $t1, 508($t4)
+		sw $t1, 764($t4)
+		sw $t1, 1020($t4)
+		sw $t1, 1016($t4)
+		sw $t1, 1024($t4)
+		
+		j SLEEP
+drawLevel2Ind:
+		sw $t1, 0($t4)
+		sw $t1, -4($t4)
+		sw $t1, -8($t4)
+		sw $t1, 256($t4)
+		sw $t1, 512($t4)
+		sw $t1, 508($t4)
+		sw $t1, 504($t4)
+		sw $t1, 760($t4)
+		sw $t1, 1016($t4)
+		sw $t1, 1020($t4)
+		sw $t1, 1024($t4)
+		
+		j SLEEP
+drawLevel3Ind:
+		sw $t1, 0($t4)
+		sw $t1, -4($t4)
+		sw $t1, -8($t4)
+		sw $t1, 256($t4)
+		sw $t1, 512($t4)
+		sw $t1, 508($t4)
+		sw $t1, 504($t4)
+		sw $t1, 768($t4)
+		sw $t1, 1024($t4)
+		sw $t1, 1020($t4)
+		sw $t1, 1016($t4)
+		
+		j SLEEP
 
 # RETURNS 1 IF PLAYER IS ON A PLATFORM OR ON THE GROUND, 0 O/W
 # PREREQ: $t3 is a valid new player location within the screen
@@ -1586,13 +1902,8 @@ returnIsFinishedLevel:
 		jr $ra
 
 SLEEP:	li $v0, 32
-		li $a0, 30	# Wait 100ms (TODO)
+		li $a0, 30	# Wait 30ms
 		syscall
-		
-		#TODO: remove print
-		li $v0, 1
-		move $a0, $t9
-		#syscall
 		
 		# RESET GAME TICK IF >= 2,147,483,646
 		li $t4, 2147483646
