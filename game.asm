@@ -29,10 +29,12 @@
 #	- heart: to restore player health (out of 3)
 #
 # Link to video demonstration for final submission:
-# - (insert YouTube / MyMedia / other URL here). Make sure we can view it!	TODO!!
+# - (insert YouTube / MyMedia / other URL here). Make sure we can view it!
+# - https://www.youtube.com/watch?v=IGftLoSEIy4
 #
 # Are you OK with us sharing the video with people outside course staff?
 # - yes, and please share this project github link as well!
+# - https://github.com/andre-fong/Jump-Queen-Assembly (privated until end of April)
 #
 # Any additional information that the TA needs to know:
 # - (write here, if any)
