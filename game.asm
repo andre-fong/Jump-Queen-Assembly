@@ -50,6 +50,8 @@
 .eqv RED 0xFF0000
 .eqv DARKGRAY 0x535353
 
+.eqv PINK 0xFF5B5B
+
 .data
 playerHealth:	.byte		3
 
@@ -426,8 +428,323 @@ undrawScreenLoop:
 		addi $t5, $t5, 4	# increment by 4
 		j undrawScreenLoop
 		
-winGame:	#TODO
-		j QUIT
+undrawScreenAfterGame:
+		# INITIALIZE REGISTERS TO PREPARE FOR UNDRAW SCREEN LOOP
+		li $t4, BASE_ADDRESS
+		addi $t4, $t4, 16380	# t4 = bottom rightmost unit on screen
+		li $t5, BASE_ADDRESS		# t5 = current unit to erase
+		li $t1, 0x0	# black
+		
+		j undrawScreenAfterGameLoop
+undrawScreenAfterGameLoop:
+		bge $t5, $t4, finishedUndrawScreenAfterGame	# draw all assets once screen is done being reset to black
+		
+		sw $t1, 0($t5)	# set unit color to black
+		
+		addi $t5, $t5, 4	# increment by 4
+		j undrawScreenAfterGameLoop
+finishedUndrawScreenAfterGame:
+		jr $ra
+		
+winGame:
+		# CLEAR SCREEN
+		jal undrawScreenAfterGame
+
+		# DRAW WIN GAME SCREEN
+		li $t1, PINK
+		li $t4, BASE_ADDRESS
+		addi $t4, $t4, 5704
+		
+		# S
+		sw $t1, 8($t4)
+		sw $t1, 12($t4)
+		sw $t1, 260($t4)
+		sw $t1, 264($t4)
+		sw $t1, 512($t4)
+		sw $t1, 516($t4)
+		sw $t1, 772($t4)
+		sw $t1, 776($t4)
+		sw $t1, 1036($t4)
+		sw $t1, 1292($t4)
+		sw $t1, 1540($t4)
+		sw $t1, 1544($t4)
+		sw $t1, 1548($t4)
+		sw $t1, 1792($t4)
+		sw $t1, 1796($t4)
+		sw $t1, 1800($t4)
+		
+		# L
+		addi $t4, $t4, 24
+		sw $t1, 0($t4)
+		sw $t1, 256($t4)
+		sw $t1, 512($t4)
+		sw $t1, 768($t4)
+		sw $t1, 1024($t4)
+		sw $t1, 1280($t4)
+		sw $t1, 1536($t4)
+		sw $t1, 1540($t4)
+		sw $t1, 1792($t4)
+		sw $t1, 1796($t4)
+		sw $t1, 1800($t4)
+		sw $t1, 1804($t4)
+		
+		# A
+		addi $t4, $t4, 28
+		sw $t1, 0($t4)
+		sw $t1, 256($t4)
+		sw $t1, 252($t4)
+		sw $t1, 260($t4)
+		sw $t1, 508($t4)
+		sw $t1, 516($t4)
+		sw $t1, 764($t4)
+		sw $t1, 772($t4)
+		sw $t1, 1024($t4)
+		sw $t1, 1020($t4)
+		sw $t1, 1028($t4)
+		sw $t1, 1276($t4)
+		sw $t1, 1272($t4)
+		sw $t1, 1284($t4)
+		sw $t1, 1288($t4)
+		sw $t1, 1528($t4)
+		sw $t1, 1544($t4)
+		sw $t1, 1784($t4)
+		sw $t1, 1800($t4)
+		
+		# Y
+		addi $t4, $t4, 24
+		sw $t1, -8($t4)
+		sw $t1, 8($t4)
+		sw $t1, 252($t4)
+		sw $t1, 248($t4)
+		sw $t1, 260($t4)
+		sw $t1, 264($t4)
+		sw $t1, 508($t4)
+		sw $t1, 516($t4)
+		sw $t1, 764($t4)
+		sw $t1, 768($t4)
+		sw $t1, 772($t4)
+		sw $t1, 1024($t4)
+		sw $t1, 1280($t4)
+		sw $t1, 1536($t4)
+		sw $t1, 1792($t4)
+		
+		# !
+		addi $t4, $t4, 24
+		sw $t1, 0($t4)
+		sw $t1, 252($t4)
+		sw $t1, 256($t4)
+		sw $t1, 260($t4)
+		sw $t1, 508($t4)
+		sw $t1, 512($t4)
+		sw $t1, 516($t4)
+		sw $t1, 764($t4)
+		sw $t1, 768($t4)
+		sw $t1, 772($t4)
+		sw $t1, 1024($t4)
+		sw $t1, 1280($t4)
+		sw $t1, 1792($t4)
+		
+		# DRAW REMAINING PLAYER HEALTH
+		li $t5, BASE_ADDRESS
+		addi $t5, $t5, 9088	# unit offset for drawing heart
+		
+		li $t1, RED
+		sw $t1, 4($t5)
+		sw $t1, 12($t5)
+		sw $t1, 256($t5)
+		sw $t1, 260($t5)
+		sw $t1, 264($t5)
+		sw $t1, 272($t5)
+		sw $t1, 516($t5)
+		sw $t1, 520($t5)
+		sw $t1, 524($t5)
+		sw $t1, 776($t5)
+		li $t1, WHITE
+		sw $t1, 268($t5)
+		
+		addi $t5, $t5, -276	# unit offset for drawing number for remaining health
+		li $t1, PINK
+		
+		lb $t6, playerHealth
+		li $t7, 1
+		beq $t6, $t7, drawOneRemainingHealth
+		li $t7, 2
+		beq $t6, $t7, drawTwoRemainingHealth
+		
+		# ELSE, DRAW 3 REMAINING HEALTH
+		sw $t1, 0($t5)
+		sw $t1, -4($t5)
+		sw $t1, -8($t5)
+		sw $t1, 256($t5)
+		sw $t1, 512($t5)
+		sw $t1, 508($t5)
+		sw $t1, 504($t5)
+		sw $t1, 768($t5)
+		sw $t1, 1024($t5)
+		sw $t1, 1020($t5)
+		sw $t1, 1016($t5)
+		
+		# LOOP TO PROCESS PLAYER INPUT
+		j processInputAfterGame
+drawOneRemainingHealth:
+		sw $t1, -4($t5)
+		sw $t1, 252($t5)
+		sw $t1, 248($t5)
+		sw $t1, 508($t5)
+		sw $t1, 764($t5)
+		sw $t1, 1020($t5)
+		sw $t1, 1016($t5)
+		sw $t1, 1024($t5)
+		
+		# LOOP TO PROCESS PLAYER INPUT
+		j processInputAfterGame
+drawTwoRemainingHealth:
+		sw $t1, 0($t5)
+		sw $t1, -4($t5)
+		sw $t1, -8($t5)
+		sw $t1, 256($t5)
+		sw $t1, 512($t5)
+		sw $t1, 508($t5)
+		sw $t1, 504($t5)
+		sw $t1, 760($t5)
+		sw $t1, 1016($t5)
+		sw $t1, 1020($t5)
+		sw $t1, 1024($t5)
+		
+		# LOOP TO PROCESS PLAYER INPUT
+		j processInputAfterGame
+loseGame:
+		# CLEAR SCREEN
+		jal undrawScreenAfterGame
+
+		# DRAW LOSE GAME SCREEN
+		li $t1, PINK
+		li $t4, BASE_ADDRESS
+		addi $t4, $t4, 5704
+		
+		# L
+		sw $t1, 0($t4)
+		sw $t1, 256($t4)
+		sw $t1, 512($t4)
+		sw $t1, 768($t4)
+		sw $t1, 1024($t4)
+		sw $t1, 1280($t4)
+		sw $t1, 1284($t4)
+		sw $t1, 1288($t4)
+		
+		# O
+		addi $t4, $t4, 20
+		sw $t1, 0($t4)
+		sw $t1, 8($t4)
+		sw $t1, 256($t4)
+		sw $t1, 264($t4)
+		sw $t1, 512($t4)
+		sw $t1, 520($t4)
+		sw $t1, 768($t4)
+		sw $t1, 776($t4)
+		sw $t1, 1024($t4)
+		sw $t1, 1032($t4)
+		sw $t1, 1280($t4)
+		sw $t1, 1288($t4)
+		sw $t1, 4($t4)
+		sw $t1, 1284($t4)
+		
+		# S
+		addi $t4, $t4, 20
+		sw $t1, 0($t4)
+		sw $t1, 4($t4)
+		sw $t1, 8($t4)
+		sw $t1, 256($t4)
+		sw $t1, 512($t4)
+		sw $t1, 516($t4)
+		sw $t1, 772($t4)
+		sw $t1, 776($t4)
+		sw $t1, 1032($t4)
+		sw $t1, 1288($t4)
+		sw $t1, 1284($t4)
+		sw $t1, 1280($t4)
+		
+		# E
+		addi $t4, $t4, 20
+		sw $t1, 0($t4)
+		sw $t1, 4($t4)
+		sw $t1, 8($t4)
+		sw $t1, 256($t4)
+		sw $t1, 512($t4)
+		sw $t1, 516($t4)
+		sw $t1, 520($t4)
+		sw $t1, 768($t4)
+		sw $t1, 772($t4)
+		sw $t1, 776($t4)
+		sw $t1, 1024($t4)
+		sw $t1, 1280($t4)
+		sw $t1, 1284($t4)
+		sw $t1, 1288($t4)
+		
+		# ...
+		addi $t4, $t4, 1044
+		sw $t1, 0($t4)
+		sw $t1, 256($t4)
+		sw $t1, 12($t4)
+		sw $t1, 268($t4)
+		sw $t1, 24($t4)
+		sw $t1, 280($t4)
+		
+		# DRAW REMAINING PLAYER HEALTH (0)
+		li $t5, BASE_ADDRESS
+		addi $t5, $t5, 9088	# unit offset for drawing heart
+		
+		li $t1, RED
+		sw $t1, 4($t5)
+		sw $t1, 12($t5)
+		sw $t1, 256($t5)
+		sw $t1, 260($t5)
+		sw $t1, 264($t5)
+		sw $t1, 272($t5)
+		sw $t1, 516($t5)
+		sw $t1, 520($t5)
+		sw $t1, 524($t5)
+		sw $t1, 776($t5)
+		li $t1, WHITE
+		sw $t1, 268($t5)
+		
+		addi $t5, $t5, -276	# unit offset for drawing number for remaining health
+		li $t1, PINK
+		
+		# 0
+		sw $t1, 0($t5)
+		sw $t1, 8($t5)
+		sw $t1, 256($t5)
+		sw $t1, 264($t5)
+		sw $t1, 512($t5)
+		sw $t1, 520($t5)
+		sw $t1, 768($t5)
+		sw $t1, 776($t5)
+		sw $t1, 1024($t5)
+		sw $t1, 1032($t5)
+		sw $t1, 4($t5)
+		sw $t1, 1028($t5)
+		
+		# LOOP TO PROCESS PLAYER INPUT
+		j processInputAfterGame
+		
+processInputAfterGame:
+		# SET T5 TO ADDRESS OF KEYBOARD INPUT
+		li $t5, 0xffff0000
+		lw $t8, 0($t5)
+		beq $t8, 1, keypressHappenedAfterGame
+
+		li $v0, 32
+		li $a0, 30	# Wait 30ms
+		syscall
+		
+		j processInputAfterGame
+keypressHappenedAfterGame:
+		lw $t7, 4($t5) # this assumes $t5 is set to 0xfff0000 from before
+		beq $t7, 0x71, QUIT			# ASCII code of 'q' is 0x71
+		beq $t7, 0x72, main			# ASCII code of 'r' is 0x72
+		
+		j processInputAfterGame
 		
 loseLevel:
 		# IF PLAYER IS STILL ON FIRST LEVEL, HITTING GROUND DOES NOT DO ANYTHING
@@ -570,9 +887,6 @@ lostThirdLevel:
 		la $s1, lv2HourglassesAlive	# s1 = memory address of array lv2HourglassesAlive
 		
 		j resetFeathersLoop	# start resetting feather pickups
-
-loseGame:	#TODO
-		j QUIT
 
 gameLoop:
 		# CHECK IF PLAYER AT VERY TOP (CLEARED LEVEL)
@@ -811,13 +1125,7 @@ undrawPlayer:
 		# UPDATE AVATAR POSITION USING TEMP POSITION (T3)
 		move $t0, $t3
 		
-		# DRAW BACKGROUND NEXT
-		j drawBackground
-		
-drawBackground:
-		# TODO
-		
-		# DRAW PICKUPS NEXT
+		# DRAW FEATHERS NEXT
 		j drawFeathers
 
 drawFeathers:
@@ -1283,10 +1591,6 @@ movePlatformsUDLoop:
 		# GET STATE OF PLATFORM (0 = lowering, 1 = raising, 2+ = waiting)
 		add $t6, $s2, $t5	# t6 is memory address of lv(x)MovePlatformsUDState[iteration]
 		lw $a0, 0($t6)	# a0 = STATE of platform lv(x)MovePlatformsUD[iteration]
-		
-		#TODO, print state
-		li $v0, 1
-		#syscall
 		
 		# GET PROG OF PLATFORM (0 to 5)
 		add $t6, $s1, $t5	# t6 is memory address of lv(x)MovePlatformsUDProg[iteration]
