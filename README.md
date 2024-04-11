@@ -2,7 +2,7 @@
 
 A 64x64 2D platformer built entirely in MIPS assembly. Players navigate challenging vertical levels with precise jumps and timely powerups. 
 
-(Demo [below](https://github.com/andre-fong/Jump-Queen-Assembly/new/main?filename=README.md#demo) if you'd like to see!)
+(Demo [below](https://github.com/andre-fong/Jump-Queen-Assembly?tab=readme-ov-file#demo) if you'd like to see!)
 
 ## Features
 
